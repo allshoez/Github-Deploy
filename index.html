@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GitHub Deploy PWA</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="stylesheet" href="style.css"/>
+  <meta name="theme-color" content="#111"/>
+</head>
+<body>
+  <div class="container">
+    <h1>GitHub Deploy PWA</h1>
+
+    <!-- Terminal/log -->
+    <div id="output" class="terminal" aria-live="polite">
+      <p>Selamat datang di GitHub Deploy PWA!</p>
+    </div>
+
+    <!-- Switcher scroll (pindah di atas form) -->
+    <div class="scroll-container">
+      <button data-opt="A">A</button>
+      <button data-opt="B">B</button>
+      <button data-opt="C">C</button>
+      <button data-opt="D">D</button>
+      <button data-opt="E">E</button>
+      <button data-opt="F">F</button>
+      <button data-opt="G">G</button> <!-- Hapus Repo -->
+    </div>
+
+    <!-- Input -->
+    <div id="formContainer">
+      <input type="text" id="userInput" placeholder="ketik perintah/argumen di sini… (mis. set token ghp_xxx)"/>
+      <button id="submitBtn">Submit</button>
+    </div>
+
+    <!-- Picker -->
+    <div id="pickerRow">
+      <button id="pickFilesBtn" class="ghost">Pilih File</button>
+      <button id="pickFolderBtn" class="ghost">Pilih Folder</button>
+      <input type="file" id="filePicker" multiple hidden />
+      <input type="file" id="dirPicker" webkitdirectory mozdirectory multiple hidden />
+    </div>
+  </div>
+  
+  
+  <button id="modeToggle">🌙 Mode Theme</button>
+</div>
+  
+
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    }
+  </script>
+</body>
+</html>
