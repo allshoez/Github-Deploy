@@ -1,0 +1,210 @@
+/* Reset dasar */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: limegreen;
+  font-family: monospace;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Default Hitam-Hijau ===== */
+body {
+  background: #000;
+  color: limegreen;
+  font-family: monospace;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+h1 {
+  text-align: center;
+  padding: 10px;
+  color: limegreen;
+  border-bottom: 1px solid limegreen;
+}
+
+.terminal {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background: #000;
+  font-size: 14px;
+  line-height: 1.4em;
+  border-top: 1px solid limegreen;
+  border-bottom: 1px solid limegreen;
+}
+
+#formContainer {
+  display: flex;
+  padding: 10px;
+  background: #111;
+  border-top: 1px solid limegreen;
+}
+
+#formContainer input {
+  flex: 1;
+  padding: 8px;
+  background: black;
+  border: 1px solid limegreen;
+  color: limegreen;
+}
+
+#formContainer button {
+  margin-left: 10px;
+  background: black;
+  color: limegreen;
+  border: 1px solid limegreen;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+#formContainer button:hover {
+  background: limegreen;
+  color: black;
+}
+
+#pickerRow {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background: #111;
+  border-top: 1px solid limegreen;
+}
+
+#pickerRow button {
+  background: black;
+  color: limegreen;
+  border: 1px solid limegreen;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+#pickerRow button:hover {
+  background: limegreen;
+  color: black;
+}
+
+.scroll-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  background: #111;
+  padding: 10px;
+  border-top: 1px solid limegreen;
+}
+
+.scroll-container button {
+  flex: 0 0 auto;
+  background: black;
+  color: limegreen;
+  border: 1px solid limegreen;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.scroll-container button:hover {
+  background: limegreen;
+  color: black;
+}
+
+/* Efek cursor kedip */
+.cursor {
+  display: inline-block;
+  width: 8px;
+  background: limegreen;
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+/* ===== Dark Mode / Light Mode baru sesuai permintaan ===== */
+body.dark {
+  background: #fff; /* halaman putih */
+  color: #000; /* teks hitam */
+}
+
+body.dark .container {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+body.dark .terminal {
+  background: #f5f5f5;
+  color: #000;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+
+body.dark #formContainer,
+body.dark #pickerRow,
+body.dark .scroll-container {
+  background: #fff;
+}
+
+body.dark #formContainer button,
+body.dark #pickerRow button,
+body.dark .scroll-container button {
+  background: #3399ff; /* tombol biru */
+  color: #fff;
+  border: 1px solid #3399ff;
+}
+
+body.dark #formContainer button:hover,
+body.dark #pickerRow button:hover,
+body.dark .scroll-container button:hover {
+  background: #2ca02c; /* tombol hijau ketika ditekan / hover */
+  border-color: #2ca02c;
+  color: #fff;
+}
+
+body.dark #formContainer input {
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+}
+/* Light mode sudah default dari style sebelumnya */
+#modeToggle {
+  background: linear-gradient(145deg, #3399ff, #33ccff);
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+#modeToggle:hover {
+  background: linear-gradient(145deg, #2ca02c, #5dd05d);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+#modeToggle:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
