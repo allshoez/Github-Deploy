@@ -1,4 +1,3 @@
-  
 /* Reset dasar */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -9,78 +8,157 @@ body {
 }
 
 /* Container utama */
-.container { flex: 1; display: flex; flex-direction: column; padding: 10px; }
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
 
 /* Header dengan tombol toggle */
 header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px; border-bottom: 1px solid;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid;
 }
 
 /* Terminal Log */
 .terminal {
-  flex: 1; padding: 15px; overflow-y: auto;
-  font-size: 16px; line-height: 1.4em; border: 1px solid; margin-bottom: 10px;
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  font-size: 20px;
+  line-height: 1.4em;
+  border: 1px solid;
+  margin-bottom: 10px;
 }
 
 /* Input & Tombol umum */
 input, select, textarea, button {
-  font-family: monospace; padding: 8px; margin: 5px 0;
-  border-radius: 4px; border: 1px solid;
+  font-family: monospace;
+  padding: 15px 8px;
+  margin: 2px 0;
+  border-radius: 4px;
+  border: 1px solid;
 }
-button { cursor: pointer; }
+button {
+  cursor: pointer;
+  font-size: 20px;
+}
+
+/* Form-row: Input + Button sejajar */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+  margin: 5px 0;
+}
 
 /* Repo Content */
 #repoContent {
-  margin: 10px 0; padding: 10px; border: 1px solid;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid;
 }
-#repoContent ul { margin-top: 10px; }
+#repoContent ul {
+  margin-top: 10px;
+}
 
 /* File Editor */
 #fileNameInput { width: 100%; }
-#fileContentInput { width: 100%; height: 120px; resize: vertical; margin-top: 5px; }
+#fileContentInput {
+  width: 100%;
+  height: 120px;
+  resize: vertical;
+  margin-top: 5px;
+}
 
 /* Tombol CRUD */
 #fileActions {
-  display: flex; justify-content: space-between; gap: 5px; margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  margin-top: 10px;
 }
-#createFileBtn, #editFileBtn, #deleteFileBtn { flex: 1; text-align: center; }
+#createFileBtn, #editFileBtn, #deleteFileBtn {
+  flex: 1;
+  text-align: center;
+}
 
-/* Cursor kedip */
-.cursor { display: inline-block; width: 8px; margin-left: 2px;
-  animation: blink 1s steps(2, start) infinite; }
-@keyframes blink { to { visibility: hidden; } }
-
-/* ===== Tema Gelap ===== */
-body.dark { background: #000; color: limegreen; }
+/* ----------------------- */
+/* Tema Gelap (hitam-hijau) */
+/* ----------------------- */
+body.dark {
+  background: #000;
+  color: limegreen;
+}
 body.dark header { border-color: limegreen; }
-body.dark .terminal { background: #000; border-color: limegreen; }
-body.dark input, body.dark select, body.dark textarea, body.dark button {
-  background: #000; color: limegreen; border-color: limegreen;
+body.dark .terminal {
+  background: #000;
+  border-color: limegreen;
 }
-body.dark button:hover { background: limegreen; color: black; }
-body.dark .cursor { background: limegreen; }
+body.dark input,
+body.dark select,
+body.dark textarea,
+body.dark button {
+  background: #000;
+  color: limegreen;
+  border-color: limegreen;
+}
+body.dark button:hover {
+  background: limegreen;
+  color: black;
+}
 
-/* ===== Tema Terang ===== */
-body.light { background: #fff; color: #000; }
-body.light header { border-color: #000; }
-body.light .terminal { background: #f5f5f5; border-color: #000; color: #000; }
-body.light input, body.light select, body.light textarea, body.light button {
-  background: #fff; color: #000; border-color: #000;
+/* ---------------------- */
+/* Tema Terang (putih-biru/hijau) */
+/* ---------------------- */
+body.light {
+  background: #fff;
+  color: #000;
 }
-body.light button { background: #3399ff; color: #fff; border-color: #3399ff; }
-body.light button:hover { background: #2ca02c; color: #fff; border-color: #2ca02c; }
-body.light .cursor { background: #000; }
+body.light header { border-color: #000; }
+body.light .terminal {
+  background: #f5f5f5;
+  border-color: #000;
+  color: #000;
+}
+body.light input,
+body.light select,
+body.light textarea,
+body.light button {
+  background: #fff;
+  color: #000;
+  border-color: #000;
+}
+body.light button {
+  background: #3399ff;
+  color: #fff;
+  border-color: #3399ff;
+}
+body.light button:hover {
+  background: #2ca02c;
+  color: #fff;
+  border-color: #2ca02c;
+}
 
 /* Tombol toggle */
 #modeToggle {
   background: linear-gradient(145deg, #3399ff, #33ccff);
-  color: #fff; border: none; border-radius: 25px;
-  padding: 6px 14px; font-size: 13px; cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: all 0.3s ease;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 6px 14px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  text-align: center;
 }
 #modeToggle:hover {
   background: linear-gradient(145deg, #2ca02c, #5dd05d);
   transform: translateY(-2px);
 }
-  
