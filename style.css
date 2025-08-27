@@ -29,23 +29,25 @@ header {
   flex: 1;
   padding: 15px;
   overflow-y: auto;
-  font-size: 20px;
+  font-size: 16px;
   line-height: 1.4em;
   border: 1px solid;
   margin-bottom: 10px;
+  border-radius: 6px;
 }
 
 /* Input & Tombol umum */
 input, select, textarea, button {
   font-family: monospace;
-  padding: 15px 8px;
+  padding: 12px 8px;
   margin: 2px 0;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid;
 }
 button {
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
+  transition: all 0.2s ease;
 }
 
 /* Form-row: Input + Button sejajar */
@@ -62,18 +64,73 @@ button {
   margin: 10px 0;
   padding: 10px;
   border: 1px solid;
+  border-radius: 6px;
 }
-#repoContent ul {
-  margin-top: 10px;
-}
+#repoContent ul { margin-top: 10px; }
 
 /* File Editor */
 #fileNameInput { width: 100%; }
-#fileContentInput {
+
+/* === CODE BOX ala ChatGPT === */
+.code-box {
+  position: relative;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #1e1e1e;
+  margin: 10px 0;
+  padding-top: 35px; /* ruang untuk toolbar */
+  overflow: hidden;
+}
+.code-box textarea {
   width: 100%;
-  height: 120px;
-  resize: vertical;
-  margin-top: 5px;
+  min-height: 200px;
+  max-height: 60vh;
+  background: #1e1e1e;
+  color: #dcdcdc;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: monospace;
+  font-size: 14px;
+  padding: 10px;
+  white-space: pre;
+  overflow-x: auto;
+  line-height: 1.4em;
+}
+.code-actions {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  display: flex;
+  gap: 5px;
+}
+.code-actions button {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s ease;
+}
+.code-actions button:hover { background: #555; }
+
+/* Fullscreen editor */
+.fullscreen {
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  right: 10px !important;
+  bottom: 10px !important;
+  z-index: 9999;
+  background: #1e1e1e;
+  border: 2px solid #666;
+  border-radius: 10px;
+}
+.fullscreen textarea {
+  min-height: calc(100% - 40px);
+  font-size: 16px;
 }
 
 /* Tombol CRUD */
@@ -161,4 +218,20 @@ body.light button:hover {
 #modeToggle:hover {
   background: linear-gradient(145deg, #2ca02c, #5dd05d);
   transform: translateY(-2px);
+}
+
+/* Custom Scrollbar */
+.terminal::-webkit-scrollbar,
+textarea::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.terminal::-webkit-scrollbar-thumb,
+textarea::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+.terminal::-webkit-scrollbar-thumb:hover,
+textarea::-webkit-scrollbar-thumb:hover {
+  background: #888;
 }
