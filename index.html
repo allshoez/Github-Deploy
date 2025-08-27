@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GitHub File Manager</title>
 <link rel="stylesheet" href="style.css"/>
+
+<title>GitHub File Manager</title>
+
 </head>
 <body class="dark">
 <div class="container">
@@ -29,10 +31,22 @@
 
   <div id="repoContent">
     <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
-    <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
+    
+    <!-- CODE BOX WRAPPER -->
+    <div class="code-box" id="codeBox">
+      <div class="code-actions">
+        <button onclick="copyCode()">📋</button>
+        <button onclick="toggleFullscreen()">🔲</button>
+      </div>
+      <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
+    </div>
+
     <div id="fileList"></div>
   </div>
   
+  <div class="form-row">
+    <select id="branchSelect"><option value="">-- Pilih Branch --</option></select>
+  </div>
 
   <div id="fileActions">
     <button id="createFileBtn">Buat File</button>
@@ -42,5 +56,18 @@
 </div>
 
 <script src="script.js"></script>
+<script>
+function copyCode() {
+  const textarea = document.getElementById("fileContentInput");
+  textarea.select();
+  document.execCommand("copy");
+  alert("Isi berhasil disalin!");
+}
+
+function toggleFullscreen() {
+  const box = document.getElementById("codeBox");
+  box.classList.toggle("fullscreen");
+}
+</script>
 </body>
 </html>
