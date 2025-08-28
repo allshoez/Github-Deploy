@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -61,8 +62,12 @@
     </select>
     <button onclick="runAction()">Jalankan</button>
   </div>
-</div>
 
+  <!-- Hidden file input untuk upload -->
+  <input type="file" id="fileUploadInput" style="display:none"/>
+  <button id="uploadFileBtn" style="display:none"></button>
+
+</div>
 <script src="script.js"></script>
 <script>
 function copyCode() {
@@ -71,22 +76,9 @@ function copyCode() {
   document.execCommand("copy");
   alert("Isi berhasil disalin!");
 }
-
 function toggleFullscreen() {
   const box = document.getElementById("codeBox");
   box.classList.toggle("fullscreen");
-}
-
-// Handler aksi
-function runAction() {
-  const action = document.getElementById("actionMenu").value;
-  switch(action) {
-    case "create": alert("➡️ Buat file dijalankan"); break;
-    case "edit": alert("➡️ Edit file dijalankan"); break;
-    case "delete": alert("➡️ Hapus file dijalankan"); break;
-    case "upload": alert("➡️ Upload file dijalankan"); break;
-    default: alert("Pilih aksi dulu!");
-  }
 }
 </script>
 </body>
