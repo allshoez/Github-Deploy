@@ -1,237 +1,103 @@
 /* Reset dasar */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: monospace;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; }
 
 /* Container utama */
-.container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-}
+.container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
 
-/* Header dengan tombol toggle */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid;
-}
+/* Header */
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+header h1 { font-size:1.8rem; }
+header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; }
 
-/* Terminal Log */
-.terminal {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  font-size: 16px;
-  line-height: 1.4em;
-  border: 1px solid;
-  margin-bottom: 10px;
-  border-radius: 6px;
-}
+/* Terminal */
+.terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; }
+body.light .terminal { background:#eee; color:#000; }
 
-/* Input & Tombol umum */
-input, select, textarea, button {
-  font-family: monospace;
-  padding: 12px 8px;
-  margin: 2px 0;
-  border-radius: 6px;
-  border: 1px solid;
-}
-button {
-  cursor: pointer;
-  font-size: 16px;
-  transition: all 0.2s ease;
-}
+/* Form Rows */
+.form-row { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
+input[type=text], select, button { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; }
+body.light input, body.light select { border:1px solid #aaa; }
 
-/* Form-row: Input + Button sejajar */
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 6px;
-  align-items: center;
-  margin: 5px 0;
-}
+/* Kolom nama file/folder full width */
+#fileNameInput { width:100%; font-size:1rem; padding:10px; }
 
 /* Repo Content */
-#repoContent {
-  margin: 10px 0;
-  padding: 10px;
-  border: 1px solid;
-  border-radius: 6px;
-}
-#repoContent ul { margin-top: 10px; }
+#repoContent { margin:5px 0; padding:10px; border:1px solid #444; border-radius:6px; }
+#repoContent ul { list-style:none; padding-left:10px; margin-top:5px; }
+#repoContent li { padding:4px 0; font-size:1rem; }
 
-/* File Editor */
-#fileNameInput { width: 100%; }
+/* Code Box */
+.code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:40px; }
+.code-box textarea { width:100%; min-height:220px; background:transparent; color:#dcdcdc; border:none; outline:none; padding:12px; resize:vertical; font-family:monospace; font-size:1rem; line-height:1.5; }
+.code-actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
+.code-actions button { background:#333; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:14px; }
+.code-actions button:hover { background:#555; }
 
-/* === CODE BOX ala ChatGPT === */
-.code-box {
-  position: relative;
-  border: 1px solid #333;
-  border-radius: 8px;
+/* Fullscreen Code Box */
+.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
   background: #1e1e1e;
-  margin: 10px 0;
-  padding-top: 35px; /* ruang untuk toolbar */
-  overflow: hidden;
+  border: none; /* biar full */
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
 }
-.code-box textarea {
+
+.fullscreen textarea {
+  flex: 1;
   width: 100%;
-  min-height: 200px;
-  max-height: 60vh;
-  background: #1e1e1e;
+  height: 100%;
+  padding: 15px;
+  font-size: 1.2rem;
+  resize: none;
+  background: transparent;
   color: #dcdcdc;
   border: none;
   outline: none;
-  resize: none;
-  font-family: monospace;
-  font-size: 14px;
-  padding: 10px;
-  white-space: pre;
-  overflow-x: auto;
-  line-height: 1.4em;
+  line-height: 1.5;
 }
-.code-actions {
+
+/* toolbar tetap di atas fullscreen */
+.fullscreen .code-actions {
   position: absolute;
-  top: 5px;
-  right: 8px;
-  display: flex;
-  gap: 5px;
-}
-.code-actions button {
-  background: #333;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s ease;
-}
-.code-actions button:hover { background: #555; }
-
-/* Fullscreen editor */
-.fullscreen {
-  position: fixed !important;
-  top: 10px !important;
-  left: 10px !important;
-  right: 10px !important;
-  bottom: 10px !important;
-  z-index: 9999;
-  background: #1e1e1e;
-  border: 2px solid #666;
-  border-radius: 10px;
-}
-.fullscreen textarea {
-  min-height: calc(100% - 40px);
-  font-size: 16px;
+  top: 10px;
+  right: 10px;
+  z-index: 10000;
 }
 
-/* Tombol CRUD */
-#fileActions {
-  display: flex;
-  justify-content: space-between;
-  gap: 5px;
-  margin-top: 10px;
+/* Tombol CRUD & Upload */
+#fileActions { display:flex; gap:5px; margin-top:10px; flex-wrap:wrap; }
+#fileActions button { flex:1; text-align:center; padding:10px; font-size:1rem; cursor:pointer; }
+
+/* Dark / Light Theme */
+body.dark { background:#000; color:limegreen; }
+body.dark input, body.dark select, body.dark textarea, body.dark button { background:#000; color:limegreen; border-color:limegreen; }
+body.dark button:hover { background:limegreen; color:black; }
+
+body.light { background:#fff; color:#000; }
+body.light input, body.light select, body.light textarea { background:#fff; color:#000; }
+body.light button { background:#3399ff; color:#fff; border-color:#3399ff; }
+body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; }
+
+/* Scrollbar */
+.terminal::-webkit-scrollbar, textarea::-webkit-scrollbar { width:8px; height:8px; }
+.terminal::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb { background:#666; border-radius:4px; }
+.terminal::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover { background:#888; }
+
+/* Responsive */
+@media screen and (max-width:600px){
+  .form-row { flex-direction:column; }
+  .code-box textarea { min-height:160px; font-size:1rem; }
+  header h1 { font-size:1.4rem; }
+  header button { font-size:0.9rem; padding:5px 10px; }
 }
-#createFileBtn, #editFileBtn, #deleteFileBtn {
-  flex: 1;
+option {
   text-align: center;
-}
-
-/* ----------------------- */
-/* Tema Gelap (hitam-hijau) */
-/* ----------------------- */
-body.dark {
-  background: #000;
-  color: limegreen;
-}
-body.dark header { border-color: limegreen; }
-body.dark .terminal {
-  background: #000;
-  border-color: limegreen;
-}
-body.dark input,
-body.dark select,
-body.dark textarea,
-body.dark button {
-  background: #000;
-  color: limegreen;
-  border-color: limegreen;
-}
-body.dark button:hover {
-  background: limegreen;
-  color: black;
-}
-
-/* ---------------------- */
-/* Tema Terang (putih-biru/hijau) */
-/* ---------------------- */
-body.light {
-  background: #fff;
-  color: #000;
-}
-body.light header { border-color: #000; }
-body.light .terminal {
-  background: #f5f5f5;
-  border-color: #000;
-  color: #000;
-}
-body.light input,
-body.light select,
-body.light textarea,
-body.light button {
-  background: #fff;
-  color: #000;
-  border-color: #000;
-}
-body.light button {
-  background: #3399ff;
-  color: #fff;
-  border-color: #3399ff;
-}
-body.light button:hover {
-  background: #2ca02c;
-  color: #fff;
-  border-color: #2ca02c;
-}
-
-/* Tombol toggle */
-#modeToggle {
-  background: linear-gradient(145deg, #3399ff, #33ccff);
-  color: #fff;
-  border: none;
-  border-radius: 25px;
-  padding: 6px 14px;
-  font-size: 20px;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: all 0.3s ease;
-  text-align: center;
-}
-#modeToggle:hover {
-  background: linear-gradient(145deg, #2ca02c, #5dd05d);
-  transform: translateY(-2px);
-}
-
-/* Custom Scrollbar */
-.terminal::-webkit-scrollbar,
-textarea::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.terminal::-webkit-scrollbar-thumb,
-textarea::-webkit-scrollbar-thumb {
-  background: #666;
-  border-radius: 4px;
-}
-.terminal::-webkit-scrollbar-thumb:hover,
-textarea::-webkit-scrollbar-thumb:hover {
-  background: #888;
 }
