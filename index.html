@@ -4,9 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="stylesheet" href="style.css"/>
-
 <title>GitHub File Manager</title>
-
 </head>
 <body class="dark">
 <div class="container">
@@ -19,16 +17,19 @@
     <p>Selamat datang di GitHub File Manager!</p>
   </div>
 
+  <!-- Token -->
   <div class="form-row">
     <input type="text" id="tokenInput" placeholder="Token ghp_xxx"/>
     <button id="saveTokenBtn">Set Token</button>
   </div>
 
+  <!-- Repo -->
   <div class="form-row">
     <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
     <button id="loadRepoBtn">Load Repo</button>
   </div>
 
+  <!-- File Area -->
   <div id="repoContent">
     <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
     
@@ -43,15 +44,22 @@
 
     <div id="fileList"></div>
   </div>
-  
+
+  <!-- Branch -->
   <div class="form-row">
     <select id="branchSelect"><option value="">-- Pilih Branch --</option></select>
   </div>
 
-  <div id="fileActions">
-    <button id="createFileBtn">Buat File</button>
-    <button id="editFileBtn">Edit File</button>
-    <button id="deleteFileBtn">Hapus File</button>
+  <!-- Dropdown Aksi -->
+  <div class="form-row">
+    <select id="actionMenu">
+      <option value="">-- Pilih Aksi --</option>
+      <option value="create">➕ Buat File</option>
+      <option value="edit">✏️ Edit File</option>
+      <option value="delete">🗑️ Hapus File</option>
+      <option value="upload">📂 Upload File</option>
+    </select>
+    <button onclick="runAction()">Jalankan</button>
   </div>
 </div>
 
@@ -67,6 +75,18 @@ function copyCode() {
 function toggleFullscreen() {
   const box = document.getElementById("codeBox");
   box.classList.toggle("fullscreen");
+}
+
+// Handler aksi
+function runAction() {
+  const action = document.getElementById("actionMenu").value;
+  switch(action) {
+    case "create": alert("➡️ Buat file dijalankan"); break;
+    case "edit": alert("➡️ Edit file dijalankan"); break;
+    case "delete": alert("➡️ Hapus file dijalankan"); break;
+    case "upload": alert("➡️ Upload file dijalankan"); break;
+    default: alert("Pilih aksi dulu!");
+  }
 }
 </script>
 </body>
