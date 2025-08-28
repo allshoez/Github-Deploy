@@ -136,4 +136,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try{
       const fileData=await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);
-      await apiRequest(`https://api.github.com/repos/${currentRepo}/
+      await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`,"DELETE",{
+        message:`Hapus file ${name}`,
+        sha:fileData.sha
+      });
+      log(`✅ File ${name} berhasil dihapus.`,"success");
+      deleteConfirm=false;
+      editingFile="";
+      document.getElementById("loadRepoBtn").click();
+    }catch(e){
+      log("❌ Error hapus file: "+e.message,"error");
+      deleteConfirm=false;
+      editingFile="";
+    }
+  }
+
+  // ===== Upload File =====
+  const uploadBtn = document.getElementById("uploadFileBtn");
+  const fileInput = document.getElementById("fileUploadInput");
+
+  uploadBtn.addEventListener("click", ()=>{
+    if(!currentRepo) return log("⚠️ Pilih repo dulu!","error");
+    if(!fileInput.files.length) return log("⚠️ Pilih file dulu!","error");
+    const file=fileInput.files[0];
+    const reader=new FileReader();
+    reader.onload=async (e)=>{
+      const content=btoa(unescape(encodeURIComponent(e.target.result)));
+      try{
+        await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${file.name}`,"PUT",{
+          message:`Upload file ${file.name}`,
+          content:content
+        });
+        log(`✅ File ${file.name} berhasil diupload.`,"success");
+        document.getElementById("loadRepoBtn").click();
+      }catch(err){ log("❌ Error upload file: "+err.message,"error"); }
+    };
+    reader.readAsText(file);
+  });
+
+  // ===== Dropdown runAction =====
+  window.runAction = function(){
+    const action=document.getElementById("actionMenu").value;
+    switch(action){
+      case "create": createFile(); break;
+      case "edit": editFile(); break;
+      case "delete": deleteFile(); break;
+      case "upload": fileInput.click(); break;
+      default: alert("⚠️ Pilih aksi dulu!");
+    }
+  }
+
+  // ===== Toggle Dark/Light =====
+  const toggleBtn=document.getElementById("modeToggle");
+  toggleBtn.addEventListener("click", ()=>{
+    document.body.classList.toggle("light");
+    document.body.classList.toggle("dark");
+    toggleBtn.textContent=document.body.classList.contains("dark")?"☀️ Mode":"🌙 Mode";
+  });
+});
