@@ -1,64 +1,64 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
- <link rel="manifest" href="/manifest.json" />
-<link rel="stylesheet" href="style.css"/>
-<title>GitHub File Manager</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="style.css"/>
+  <title>GitHub File Manager</title>
 </head>
 <body class="dark">
-<div class="container">
-  <header>
-    <h1>GitHub File Manager</h1>
-    <button id="modeToggle">☀️ Mode</button>
-  </header>
+  <div class="container">
+    <header>
+      <h1>GitHub File Manager</h1>
+      <button id="modeToggle">☀️ Mode</button>
+    </header>
 
-  <div id="output" class="terminal">
-    <p>Selamat datang di GitHub File Manager!</p>
-  </div>
-
-  <!-- Token -->
-  <div class="form-row">
-    <input type="text" id="tokenInput" placeholder="Token ghp_xxx"/>
-    <button id="saveTokenBtn">Set Token</button>
-  </div>
-
-  <!-- Repo -->
-  <div class="form-row">
-    <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
-    <button id="loadRepoBtn">Load Repo</button>
-  </div>
-
-  <!-- File Area -->
-  <div id="repoContent">
-    <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
-    
-    <!-- Editor -->
-    <div class="code-box" id="codeBox">
-      <div class="code-actions">
-        <button onclick="copyCode()">📋</button>
-        <button onclick="toggleFullscreen()">🔲</button>
-      </div>
-      <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
+    <div id="output" class="terminal">
+      <p>Selamat datang di GitHub File Manager!</p>
     </div>
 
-    <div id="fileList"></div>
+    <!-- Token -->
+    <div class="form-row">
+      <input type="text" id="tokenInput" placeholder="Token ghp_xxx"/>
+      <button id="saveTokenBtn">Set Token</button>
+    </div>
+
+    <!-- Repo -->
+    <div class="form-row">
+      <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
+      <button id="loadRepoBtn">Load Repo</button>
+    </div>
+
+    <!-- File Area -->
+    <div id="repoContent">
+      <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
+      
+      <!-- Editor -->
+      <div class="code-box" id="codeBox">
+        <div class="code-actions">
+          <button onclick="copyCode()">📋</button>
+          <button onclick="toggleFullscreen()">🔲</button>
+        </div>
+        <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
+      </div>
+
+      <div id="fileList"></div>
+    </div>
+
+    <!-- Action Dropdown -->
+    <div class="form-row">
+      <select id="actionMenu">
+        <option value="">-- Pilih Aksi --</option>
+        <option value="create">➕ Buat File</option>
+        <option value="edit">✏️ Edit File</option>
+        <option value="delete">🗑️ Hapus File</option>
+        <option value="uploadFileBtn">📂 Upload File</option>
+      </select>
+      <button onclick="runAction()">Jalankan</button>
+    </div>
   </div>
 
-  <!-- Action Dropdown -->
-  <div class="form-row">
-    <select id="actionMenu">
-      <option value="">-- Pilih Aksi --</option>
-      <option value="create">➕ Buat File</option>
-      <option value="edit">✏️ Edit File</option>
-      <option value="delete">🗑️ Hapus File</option>
-      <option value="uploadFileBtn">📂 Upload File</option>
-    </select>
-    <button onclick="runAction()">Jalankan</button>
-  </div>
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
