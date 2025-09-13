@@ -11,7 +11,7 @@
 <div class="container">
   <header>
     <h1>GitHub File Manager</h1>
-    <button id="modeToggle">\u2600\uFE0F Mode</button>
+    <button id="modeToggle">☀️ Mode</button>
   </header>
 
   <div id="output" class="terminal">
@@ -37,8 +37,8 @@
     <!-- Editor -->
     <div class="code-box" id="codeBox">
       <div class="code-actions">
-        <button onclick="copyCode()">\uD83D\uDCCB</button>
-        <button onclick="toggleFullscreen()">\u2692\uFE0F</button>
+        <button onclick="copyCode()">📋</button>
+        <button onclick="toggleFullscreen()">🔲</button>
       </div>
       <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
     </div>
@@ -50,10 +50,10 @@
   <div class="form-row">
     <select id="actionMenu">
       <option value="">-- Pilih Aksi --</option>
-      <option value="create">\u2795 Buat File</option>
-      <option value="edit">\u270F\uFE0F Edit File</option>
-      <option value="delete">\uD83D\uDD51\uFE0F Hapus File</option>
-      <option value="uploadFileBtn">\uD83D\uDCC2 Upload File</option>
+      <option value="create">➕ Buat File</option>
+      <option value="edit">✏️ Edit File</option>
+      <option value="delete">🗑️ Hapus File</option>
+      <option value="uploadFileBtn">📂 Upload File</option>
     </select>
     <button onclick="runAction()">Jalankan</button>
   </div>
