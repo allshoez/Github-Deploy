@@ -20,6 +20,15 @@ document.addEventListener("DOMContentLoaded", () => {
     output.scrollTop = output.scrollHeight;
   }
 
+  // ===== Safe decode UTF-8 Base64 =====
+  function decodeFileContent(b64) {
+    try {
+      return decodeURIComponent(escape(atob(b64)));
+    } catch {
+      return atob(b64);
+    }
+  }
+
   async function apiRequest(url, method = "GET", body = null) {
     const headers = { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" };
     if (body) headers["Content-Type"] = "application/json";
@@ -43,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== LOAD REPOS =====
   async function loadRepos() {
     try {
-      log("🔍 Memuat daftar repository...", "info");
+      log("🔄 Memuat daftar repository...", "info");
       const repos = await apiRequest("https://api.github.com/user/repos");
       repoSelect.innerHTML = '<option value="">-- Pilih Repo --</option>';
       repos.forEach(r => {
@@ -89,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
         content: encoded
       });
       log(`✅ File ${name} berhasil dibuat.`, "success");
+      fileContentInput.value = "";
       document.getElementById("loadRepoBtn").click();
     } catch (e) { log("❌ Error buat file: " + e.message, "error"); }
   }
@@ -101,9 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (editingFile !== name) {
       try {
         const fileData = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);
-        // FIX: Decode Base64 ke UTF-8
-        const decodedContent = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ""))));
-        fileContentInput.value = decodedContent;
+        fileContentInput.value = decodeFileContent(fileData.content.replace(/\n/g, ""));
         editingFile = name;
         log(`✏️ File ${name} siap diedit. Tekan Edit File lagi untuk menyimpan.`, "info");
       } catch (e) { log("❌ Error ambil file: " + e.message, "error"); }
@@ -118,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         log(`✅ File ${name} berhasil diedit.`, "success");
         editingFile = "";
+        fileContentInput.value = "";
         document.getElementById("loadRepoBtn").click();
       } catch (e) { log("❌ Error edit file: " + e.message, "error"); }
     }
@@ -144,6 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
       log(`✅ File ${name} berhasil dihapus.`, "success");
       deleteConfirm = false;
       editingFile = "";
+      fileContentInput.value = "";
       document.getElementById("loadRepoBtn").click();
     } catch (e) {
       log("❌ Error hapus file: " + e.message, "error");
@@ -152,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ===== UPLOAD FILE LANGSUNG =====
+  // ===== UPLOAD FILE =====
   async function uploadFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
     const fileInput = document.createElement("input");
@@ -206,6 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleBtn.addEventListener("click", () => {
     document.body.classList.toggle("light");
     document.body.classList.toggle("dark");
-    toggleBtn.textContent = document.body.classList.contains("dark") ? "🌞 Mode" : "🌜 Mode";
+    toggleBtn.textContent = document.body.classList.contains("dark") ? "🌞 Mode" : "🌙 Mode";
   });
 });
