@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -73,6 +72,57 @@ body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; 
   header h1 { font-size:1.4rem; }
   header button { font-size:0.9rem; padding:5px 10px; }
 }
+/* Container */
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 16px 0;
+}
+
+/* Select dropdown */
+#actionMenu {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover dan focus */
+#actionMenu:hover {
+  border-color: #888;
+}
+#actionMenu:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+/* Opsi (option) */
+#actionMenu option {
+  padding: 8px;
+  font-size: 16px;
+}
+
+/* Tombol */
+button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #4CAF50;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
 </style>
 <title>GitHub File Manager</title>
 </head>
@@ -95,7 +145,7 @@ body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; 
 
   <!-- Repo -->
   <div class="form-row">
-    <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
+    <select id="repoSelect"><option value="">Pilih Repo</option></select>
     <button id="loadRepoBtn">Load Repo</button>
   </div>
 
@@ -118,7 +168,7 @@ body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; 
   <!-- Action Dropdown -->
   <div class="form-row">
     <select id="actionMenu">
-      <option value="">-- Pilih Aksi --</option>
+      <option value="">Menu</option>
       <option value="create">➕ Buat File</option>
       <option value="edit">✏️ Edit File</option>
       <option value="delete">🗑️ Hapus File</option>
