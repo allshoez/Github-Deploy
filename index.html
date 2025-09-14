@@ -5,7 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="manifest" href="/manifest.json" />
 <link rel="stylesheet" href="style.css"/>
-<title>GitHub File Manager</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; }
+
+/* Container utama */
+.container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
+
+/* Header */
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+header h1 { font-size:1.8rem; }
+header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; transition:0.2s; }
+header button:hover { background:#555; color:#fff; }
+
+/* Terminal */
+.terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; }
+body.light .terminal { background:#eee; color:#000; }
+
+/* Form Rows modern */
+.form-row { display:flex; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+input[type=text], textarea, button { padding:12px; border-radius:8px; border:1px solid #444; font-family:monospace; font-size:1rem; transition:0.2s; }
+input[type=text]:focus, textarea:focus { outline:none; border-color:#2ca02c; background-color:#111; color:#0f0; }
+button { cursor:pointer; background:#2ca02c; color:#fff; border:none; flex:1; }
+button:hover, button:focus { background:#28a745; color:#fff; }
+
+/* Kolom nama file/folder full width */
+#fileNameInput { width:100%; }
+
+/* Repo Content */
+#repoContent { margin:5px 0; padding:10px; border:1px solid #444; border-radius:6px; }
+#repoContent ul { list-style:none; padding-left:10px; margin-top:5px; }
+#repoContent li { padding:4px 0; font-size:1rem; }
+
+/* Code Box modern */
+.code-box { position:relative; border:1px solid #333; border-radius:8px; background:#1e1e1e; margin:10px 0; padding-top:40px; }
+.code-box textarea { width:100%; min-height:220px; background:transparent; color:#dcdcdc; border:none; outline:none; padding:12px; resize:vertical; font-family:monospace; font-size:1rem; line-height:1.5; }
+.code-actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
+.code-actions button { background:#333; color:#fff; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:14px; }
+.code-actions button:hover { background:#555; }
+
+/* Tombol aksi modern */
+#fileActions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+#fileActions button { flex:1; padding:12px; font-size:1rem; border-radius:8px; background:#2ca02c; color:#fff; border:none; transition:0.2s; }
+#fileActions button:hover { background:#28a745; }
+
+/* Dark / Light Theme */
+body.dark { background:#000; color:limegreen; }
+body.dark input, body.dark textarea { background:#111; color:limegreen; border-color:limegreen; }
+body.dark button { background:limegreen; color:#000; }
+body.dark button:hover { background:#0f0; color:#000; }
+
+body.light { background:#fff; color:#000; }
+body.light input, body.light textarea { background:#fff; color:#000; border:1px solid #aaa; }
+body.light button { background:#3399ff; color:#fff; border-color:#3399ff; }
+body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; }
+
+/* Scrollbar */
+.terminal::-webkit-scrollbar, textarea::-webkit-scrollbar { width:8px; height:8px; }
+.terminal::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb { background:#666; border-radius:4px; }
+.terminal::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover { background:#888; }
+
+/* Responsive */
+@media screen and (max-width:600px){
+  .form-row { flex-direction:column; }
+  .code-box textarea { min-height:160px; font-size:1rem; }
+  header h1 { font-size:1.4rem; }
+  header button { font-size:0.9rem; padding:5px 10px; }
+}
+</style>
+<title>GitHub File Manager Modern</title>
 </head>
 <body class="dark">
 <div class="container">
@@ -15,7 +83,7 @@
   </header>
 
   <div id="output" class="terminal">
-    <p>Selamat datang di GitHub File Manager!</p>
+    <p>Selamat datang di GitHub File Manager Modern!</p>
   </div>
 
   <!-- Token -->
@@ -26,7 +94,7 @@
 
   <!-- Repo -->
   <div class="form-row">
-    <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
+    <input type="text" id="repoNameInput" placeholder="Nama Repo"/>
     <button id="loadRepoBtn">Load Repo</button>
   </div>
 
@@ -46,16 +114,13 @@
     <div id="fileList"></div>
   </div>
 
-  <!-- Action Dropdown -->
-  <div class="form-row">
-    <select id="actionMenu">
-      <option value="">-- Pilih Aksi --</option>
-      <option value="create">➕ Buat File</option>
-      <option value="edit">✏️ Edit File</option>
-      <option value="delete">🗑️ Hapus File</option>
-      <option value="uploadFileBtn">📂 Upload File</option>
-    </select>
-    <button onclick="runAction()">Jalankan</button>
+  <!-- Action Buttons Modern -->
+  <div id="fileActions">
+    <button onclick="createFile()">➕ Buat File</button>
+    <button onclick="editFile()">✏️ Edit File</button>
+    <button onclick="deleteFile()">🗑️ Hapus File</button>
+    <button onclick="uploadFile()">📂 Upload File</button>
+       <button onclick="runAction()">Jalankan</button> 
   </div>
 </div>
 
