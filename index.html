@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -73,7 +74,7 @@ body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; 
   header button { font-size:0.9rem; padding:5px 10px; }
 }
 </style>
-<title>GitHub File Manager Modern</title>
+<title>GitHub File Manager</title>
 </head>
 <body class="dark">
 <div class="container">
@@ -83,18 +84,18 @@ body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; 
   </header>
 
   <div id="output" class="terminal">
-    <p>Selamat datang di GitHub File Manager Modern!</p>
+    <p>Selamat datang di GitHub File Manager!</p>
   </div>
 
-  <!-- Token -->
   <!-- Token -->
   <div class="form-row">
     <input type="text" id="tokenInput" placeholder="Token ghp_xxx"/>
     <button id="saveTokenBtn">Set Token</button>
   </div>
+
   <!-- Repo -->
   <div class="form-row">
-    <input type="text" id="repoNameInput" placeholder="Nama Repo"/>
+    <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
     <button id="loadRepoBtn">Load Repo</button>
   </div>
 
@@ -114,13 +115,16 @@ body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; 
     <div id="fileList"></div>
   </div>
 
-  <!-- Action Buttons Modern -->
-  <div id="fileActions">
-    <button onclick="createFile()">➕ Buat File</button>
-    <button onclick="editFile()">✏️ Edit File</button>
-    <button onclick="deleteFile()">🗑️ Hapus File</button>
-    <button onclick="uploadFile()">📂 Upload File</button>
-       <button onclick="runAction()">Jalankan</button> 
+  <!-- Action Dropdown -->
+  <div class="form-row">
+    <select id="actionMenu">
+      <option value="">-- Pilih Aksi --</option>
+      <option value="create">➕ Buat File</option>
+      <option value="edit">✏️ Edit File</option>
+      <option value="delete">🗑️ Hapus File</option>
+      <option value="uploadFileBtn">📂 Upload File</option>
+    </select>
+    <button onclick="runAction()">Jalankan</button>
   </div>
 </div>
 
