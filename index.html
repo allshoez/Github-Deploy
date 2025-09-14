@@ -1,64 +1,174 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="manifest" href="/manifest.json" />
-<link rel="stylesheet" href="style.css"/>
-<title>GitHub File Manager</title>
-</head>
-<body class="dark">
-<div class="container">
-  <header>
-    <h1>GitHub File Manager</h1>
-    <button id="modeToggle">☀️ Mode</button>
-  </header>
-
-  <div id="output" class="terminal">
-    <p>Selamat datang di GitHub File Manager!</p>
-  </div>
-
-  <!-- Token -->
-  <div class="form-row">
-    <input type="text" id="tokenInput" placeholder="Token ghp_xxx"/>
-    <button id="saveTokenBtn">Set Token</button>
-  </div>
-
-  <!-- Repo -->
-  <div class="form-row">
-    <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
-    <button id="loadRepoBtn">Load Repo</button>
-  </div>
-
-  <!-- File Area -->
-  <div id="repoContent">
-    <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json" />
+  <title>WA Cepat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+      header {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 250px;
+      text-align: center;
+  
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 300px;
+    }
+      h1 {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 250px;
+      text-align: center;
+    }
     
-    <!-- Editor -->
-    <div class="code-box" id="codeBox">
-      <div class="code-actions">
-        <button onclick="copyCode()">📋</button>
-        <button onclick="toggleFullscreen()">🔲</button>
-      </div>
-      <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
-    </div>
+    
+h1 a {
+  text-decoration: none;      
+  color: #ff5722;   
+  font-family: Arial, sans-serif;
+  transition: color 0.3s;
+  text-align: center;
+}
 
-    <div id="fileList"></div>
-  </div>
+    
+    input[type="tel"] {
+      width: 90%;
+      padding: 15px; 
+      margin: 30px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 20px;
+    }
+    button {
+      width: 48%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-chat {
+      background: #ff5722;
+      color: #fff;
+    }
+    .btn-history {
+      background: #ccc;
+      margin-left: 4%;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 15px;
+    }
+    .title-wa {
+  margin: 0 auto;            /* otomatis center */
+  padding: 10px 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  display: flex;             /* aktifkan flex */
+  justify-content: center;   /* horizontal tengah */
+  align-items: center;       /* vertical tengah */
+  text-align: center;
+}
 
-  <!-- Action Dropdown -->
-  <div class="form-row">
-    <select id="actionMenu">
-      <option value="">-- Pilih Aksi --</option>
-      <option value="create">➕ Buat File</option>
-      <option value="edit">✏️ Edit File</option>
-      <option value="delete">🗑️ Hapus File</option>
-      <option value="uploadFileBtn">📂 Upload File</option>
-    </select>
-    <button onclick="runAction()">Jalankan</button>
+.title-wa a {
+  text-decoration: none;
+  color: #ff5722;
+  font-weight: bold;
+  font-size: 36px;
+  font-family: Arial, sans-serif;
+  transition: color 0.3s;
+}
+
+.title-wa a:hover {
+  color: #e64a19;
+}
+  </style>
+</head>
+<body>
+
+
+<div class="container">
+  <h1 class="title-wa"><a href="pesan.html">WA CEPAT</a></h1>
+  
+  <input type="tel" id="phoneNumber" placeholder="HP : 62812xx">
+  <div style="display:flex; justify-content:space-between;">
+    <button class="btn-chat" onclick="startChat()">Mulai Chat</button>
+    <button class="btn-history" onclick="showHistory()">Histori</button>
   </div>
+  <p>
+    Ketentuan sebelum mulai:<br>
+    1. WhatsApp sudah terinstal di ponsel ini.<br>
+    2. Nomor HP Anda sudah terdaftar di WhatsApp.<br><br>
+
+    Cara menggunakan aplikasi ini:<br>
+    1. Ketik nomor HP orang lain.<br>
+    2. Tekan tombol Mulai Chat.<br><br>
+
+    Penting:<br>
+    Jika nomor yang Anda ketik sudah terdaftar di WhatsApp, Anda akan diarahkan ke halaman chat WhatsApp.
+  </p>
 </div>
 
-<script src="script.js"></script>
+<script>
+  function startChat() {
+    let phone = document.getElementById('phoneNumber').value.trim();
+    if(phone === '') {
+      alert('Masukkan nomor HP terlebih dahulu!');
+      return;
+    }
+    // Hapus karakter selain angka
+    phone = phone.replace(/\D/g,'');
+    // Jika nomor diawali 0, ubah jadi 62
+    if(phone.startsWith('0')) {
+      phone = '62' + phone.substring(1);
+    }
+    const waUrl = `https://wa.me/${phone}`;
+    window.open(waUrl, '_blank');
+    saveHistory(phone);
+  }
+
+  function saveHistory(phone) {
+    let history = JSON.parse(localStorage.getItem('waHistory') || '[]');
+    if(!history.includes(phone)) {
+      history.push(phone);
+      localStorage.setItem('waHistory', JSON.stringify(history));
+    }
+  }
+
+  function showHistory() {
+    let history = JSON.parse(localStorage.getItem('waHistory') || '[]');
+    if(history.length === 0) {
+      alert('Belum ada histori.');
+    } else {
+      alert('Histori nomor:\n' + history.join('\n'));
+    }
+  }
+</script>
+
 </body>
 </html>
