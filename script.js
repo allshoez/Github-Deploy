@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (token) {
       log("✅ Token disimpan!", "success");
       loadRepos();
-    } else log("⚠️ Masukkan token! Buat nama repo di kolom : Name file/Folder", "error");
+    } else log("⚠️ Masukkan token!", "error");
   });
 
   // ===== LOAD REPOS =====
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("createRepo")?.addEventListener("click", async () => {
     const repoName = fileNameInput.value.trim();
     if (!token) return log("⚠️ Token belum diset!", "error");
-    if (!repoName) return log("⚠️ Nama repo wajib!", "error");
+    if (!repoName) return log("⚠️ Nama repo wajib! Buat nama repo di kolom : Name File/Golder", "error");
     try {
       await apiRequest("https://api.github.com/user/repos", "POST", {
         name: repoName,
