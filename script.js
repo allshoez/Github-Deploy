@@ -22,12 +22,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== Safe decode UTF-8 Base64 =====
   function decodeFileContent(b64) {
-    try { return decodeURIComponent(escape(atob(b64))); } 
+    try { return decodeURIComponent(escape(atob(b64))); }
     catch { return atob(b64); }
   }
 
+  // ===== API REQUEST =====
   async function apiRequest(url, method = "GET", body = null) {
-    const headers = { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" };
+    const headers = {
+      Authorization: `token ${token}`,
+      Accept: "application/vnd.github.v3+json"
+    };
     if (body) headers["Content-Type"] = "application/json";
     const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
     if (!res.ok) {
@@ -64,25 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ===== CREATE REPO =====
-  document.getElementById("createRepo")?.addEventListener("click", async () => {
-    const repoName = fileNameInput.value.trim();
-    if (!token) return log("⚠️ Token belum diset!", "error");
-    if (!repoName) return log("⚠️ Nama repo wajib! Buat nama repo di kolom : Name File/Folder, Contoh : Github - Kemudian tekan tombol : Buat Repo", "error");
-    try {
-      await apiRequest("https://api.github.com/user/repos", "POST", {
-        name: repoName,
-        private: false,
-        description: "Repo dibuat via GitHub File Manager"
-      });
-      log(`✅ Repo ${repoName} berhasil dibuat.`, "success");
-      loadRepos();
-      fileNameInput.value = "";
-    } catch (e) {
-      log("❌ Error buat repo: " + e.message, "error");
-    }
-  });
-
   // ===== LOAD REPO CONTENT =====
   document.getElementById("loadRepoBtn").addEventListener("click", async () => {
     currentRepo = repoSelect.value;
@@ -98,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderRepoContent(files) {
     const repoDiv = document.getElementById("fileList");
-    repoDiv.innerHTML = "<ul>" + files.map(f => `<li>${f.type === "dir" ? "📁" : "📄"} ${f.name}</li>`).join("") + "</ul>";
+    repoDiv.innerHTML = "<ul>" + files.map(f => `<li>${f.type==="dir"?"📁":"📄"} ${f.name}</li>`).join("") + "</ul>";
   }
 
   // ===== CRUD FILE =====
@@ -178,26 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ===== CREATE FOLDER =====
-  async function createFolder() {
-    if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    const folderName = prompt("Masukkan nama folder baru:");
-    if (!folderName) return log("⚠️ Nama folder wajib!", "error");
-
-    try {
-      const path = folderName.endsWith("/") ? folderName + ".gitkeep" : folderName + "/.gitkeep";
-      const content = btoa(unescape(encodeURIComponent("")));
-      await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${path}`, "PUT", {
-        message: `Buat folder ${folderName}`,
-        content: content
-      });
-      log(`✅ Folder ${folderName} berhasil dibuat.`, "success");
-      document.getElementById("loadRepoBtn").click();
-    } catch (e) {
-      log("❌ Error buat folder: " + e.message, "error");
-    }
-  }
-
   // ===== UPLOAD FILE =====
   async function uploadFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
@@ -209,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = async () => {
-        const content = reader.result.split(",")[1];
+        const content = reader.result.split(",")[1]; // base64
         try {
           await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${file.name}`, "PUT", {
             message: `Upload file ${file.name}`,
@@ -224,15 +189,47 @@ document.addEventListener("DOMContentLoaded", () => {
     fileInput.click();
   }
 
+  // ===== CREATE FOLDER =====
+  async function createFolder() {
+    if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
+    const folderName = fileNameInput.value.trim();
+    if (!folderName) return log("⚠️ Nama folder wajib!", "error");
+    try {
+      const encoded = btoa(unescape(encodeURIComponent("# Folder kosong\n")));
+      await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${folderName}/.gitkeep`, "PUT", {
+        message: `Buat folder ${folderName}`,
+        content: encoded
+      });
+      log(`✅ Folder ${folderName} berhasil dibuat.`, "success");
+      fileNameInput.value = "";
+      document.getElementById("loadRepoBtn").click();
+    } catch (e) { log("❌ Error buat folder: " + e.message, "error"); }
+  }
+
+  // ===== DELETE REPO =====
+  async function deleteRepo() {
+    if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
+    if (!confirm(`⚠️ Yakin mau menghapus repo ${currentRepo}? Semua data hilang!`)) return;
+    try {
+      await apiRequest(`https://api.github.com/repos/${currentRepo}`, "DELETE");
+      log(`✅ Repo ${currentRepo} berhasil dihapus!`, "success");
+      currentRepo = "";
+      fileNameInput.value = "";
+      fileContentInput.value = "";
+      loadRepos();
+    } catch (e) { log("❌ Error hapus repo: " + e.message, "error"); }
+  }
+
   // ===== ACTION DROPDOWN =====
   window.runAction = function() {
     const action = document.getElementById("actionMenu").value;
-    switch(action) {
+    switch(action){
       case "create": createFile(); break;
       case "edit": editFile(); break;
       case "delete": deleteFile(); break;
-      case "uploadFileBtn": uploadFile(); break;
       case "createFolder": createFolder(); break;
+      case "uploadFileBtn": uploadFile(); break;
+      case "delletRepo": deleteRepo(); break;
       default: alert("⚠️ Pilih aksi dulu!");
     }
   };
@@ -243,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.execCommand("copy");
     alert("✅ Isi berhasil disalin!");
   };
+
   window.toggleFullscreen = function() {
     document.getElementById("codeBox").classList.toggle("fullscreen");
   };
