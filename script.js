@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (token) {
       log("✅ Token disimpan!", "success");
       loadRepos();
-    } else log("⚠️ Masukkan token!", "error");
+    } else log("⚠️ Masukkan token! Buat nama repo di kolom : Name file/Folder", "error");
   });
 
   // ===== LOAD REPOS =====
