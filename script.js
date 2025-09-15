@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const repoSelect = document.getElementById("repoSelect");
   const fileNameInput = document.getElementById("fileNameInput");
   const fileContentInput = document.getElementById("fileContentInput");
+  const actionMenu = document.getElementById("actionMenu");
 
   // ===== LOG =====
   function log(msg, type = "info") {
@@ -20,202 +21,178 @@ document.addEventListener("DOMContentLoaded", () => {
     output.scrollTop = output.scrollHeight;
   }
 
-  // ===== Safe decode UTF-8 Base64 =====
-  function decodeFileContent(b64) {
-    try {
-      return decodeURIComponent(escape(atob(b64)));
-    } catch {
-      return atob(b64);
-    }
-  }
-
+  // ===== API REQUEST =====
   async function apiRequest(url, method = "GET", body = null) {
-    const headers = { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" };
+    const headers = {
+      "Authorization": "token " + token,
+      "Accept": "application/vnd.github.v3+json"
+    };
     if (body) headers["Content-Type"] = "application/json";
-    const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
+
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : null
+    });
+
     if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Error ${res.status}: ${err}`);
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || res.statusText);
     }
     return res.json();
   }
 
-  // ===== TOKEN =====
-  document.getElementById("saveTokenBtn").addEventListener("click", () => {
-    token = document.getElementById("tokenInput").value.trim();
-    if (token) {
-      log("✅ Token disimpan!", "success");
-      loadRepos();
-    } else log("⚠️ Masukkan token!", "error");
-  });
-
-  // ===== LOAD REPOS =====
+  // ===== REPO LIST =====
   async function loadRepos() {
+    if (!token) return log("⚠️ Masukkan token dulu!", "error");
+    repoSelect.innerHTML = "<option value=''>-- Pilih Repo --</option>";
     try {
-      log("🔄 Memuat daftar repository...", "info");
       const repos = await apiRequest("https://api.github.com/user/repos");
-      repoSelect.innerHTML = '<option value="">-- Pilih Repo --</option>';
-      repos.forEach(r => {
+      repos.forEach(repo => {
         const opt = document.createElement("option");
-        opt.value = r.full_name;
-        opt.textContent = r.full_name;
+        opt.value = repo.name;
+        opt.textContent = repo.name;
         repoSelect.appendChild(opt);
       });
-      log("✅ Repo berhasil dimuat.", "success");
+      log("✅ Daftar repo dimuat.", "success");
     } catch (e) {
-      log("❌ Gagal load repo: " + e.message, "error");
+      log("❌ Error ambil repos: " + e.message, "error");
     }
   }
 
-  // ===== LOAD REPO CONTENT =====
-  document.getElementById("loadRepoBtn").addEventListener("click", async () => {
+  repoSelect.addEventListener("change", () => {
     currentRepo = repoSelect.value;
-    if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    try {
-      log(`📂 Memuat isi repo: ${currentRepo} ...`, "info");
-      const files = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/`);
-      renderRepoContent(files);
-    } catch (e) {
-      log("❌ Error load repo: " + e.message, "error");
-    }
+    log("📦 Repo dipilih: " + currentRepo);
   });
 
-  function renderRepoContent(files) {
-    const repoDiv = document.getElementById("fileList");
-    repoDiv.innerHTML = "<ul>" + files.map(f => `<li>${f.type === "dir" ? "📁" : "📄"} ${f.name}</li>`).join("") + "</ul>";
-  }
-
-  // ===== CRUD =====
+  // ===== CREATE FILE =====
   async function createFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    const name = fileNameInput.value.trim();
-    const content = fileContentInput.value || "# File baru\n";
-    if (!name) return log("⚠️ Nama file wajib!", "error");
+    const fileName = fileNameInput.value.trim();
+    const content = fileContentInput.value;
+    if (!fileName) return log("⚠️ Nama file wajib!", "error");
+
+    const url = `https://api.github.com/repos/${username()}/${currentRepo}/contents/${fileName}`;
     try {
-      const encoded = btoa(unescape(encodeURIComponent(content)));
-      await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`, "PUT", {
-        message: `Buat file ${name}`,
-        content: encoded
+      await apiRequest(url, "PUT", {
+        message: "Create file via File Manager",
+        content: btoa(content)
       });
-      log(`✅ File ${name} berhasil dibuat.`, "success");
-      fileContentInput.value = "";
-      document.getElementById("loadRepoBtn").click();
-    } catch (e) { log("❌ Error buat file: " + e.message, "error"); }
+      log(`✅ File ${fileName} berhasil dibuat.`, "success");
+    } catch (e) {
+      log("❌ Error create file: " + e.message, "error");
+    }
   }
 
+  // ===== EDIT FILE =====
   async function editFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Nama file wajib!", "error");
+    const fileName = fileNameInput.value.trim();
+    const content = fileContentInput.value;
+    if (!fileName) return log("⚠️ Nama file wajib!", "error");
 
-    if (editingFile !== name) {
-      try {
-        const fileData = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);
-        fileContentInput.value = decodeFileContent(fileData.content.replace(/\n/g, ""));
-        editingFile = name;
-        log(`✏️ File ${name} siap diedit. Tekan Edit File lagi untuk menyimpan.`, "info");
-      } catch (e) { log("❌ Error ambil file: " + e.message, "error"); }
-    } else {
-      try {
-        const fileData = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);
-        const encoded = btoa(unescape(encodeURIComponent(fileContentInput.value || "# File kosong\n")));
-        await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`, "PUT", {
-          message: `Edit file ${name}`,
-          content: encoded,
-          sha: fileData.sha
-        });
-        log(`✅ File ${name} berhasil diedit.`, "success");
-        editingFile = "";
-        fileContentInput.value = "";
-        document.getElementById("loadRepoBtn").click();
-      } catch (e) { log("❌ Error edit file: " + e.message, "error"); }
+    const url = `https://api.github.com/repos/${username()}/${currentRepo}/contents/${fileName}`;
+    try {
+      const file = await apiRequest(url);
+      await apiRequest(url, "PUT", {
+        message: "Update file via File Manager",
+        content: btoa(content),
+        sha: file.sha
+      });
+      log(`✅ File ${fileName} berhasil diupdate.`, "success");
+    } catch (e) {
+      log("❌ Error edit file: " + e.message, "error");
     }
   }
 
+  // ===== DELETE FILE =====
   async function deleteFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Nama file wajib!", "error");
+    const fileName = fileNameInput.value.trim();
+    if (!fileName) return log("⚠️ Nama file wajib!", "error");
 
-    if (!deleteConfirm || editingFile !== name) {
-      deleteConfirm = true;
-      editingFile = name;
-      log(`⚠️ Tekan Hapus File lagi untuk konfirmasi.`, "info");
-      return;
-    }
-
+    const url = `https://api.github.com/repos/${username()}/${currentRepo}/contents/${fileName}`;
     try {
-      const fileData = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);
-      await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`, "DELETE", {
-        message: `Hapus file ${name}`,
-        sha: fileData.sha
+      const file = await apiRequest(url);
+      await apiRequest(url, "DELETE", {
+        message: "Delete file via File Manager",
+        sha: file.sha
       });
-      log(`✅ File ${name} berhasil dihapus.`, "success");
-      deleteConfirm = false;
-      editingFile = "";
-      fileContentInput.value = "";
-      document.getElementById("loadRepoBtn").click();
+      log(`✅ File ${fileName} berhasil dihapus.`, "success");
     } catch (e) {
-      log("❌ Error hapus file: " + e.message, "error");
-      deleteConfirm = false;
-      editingFile = "";
+      log("❌ Error delete file: " + e.message, "error");
     }
   }
 
   // ===== UPLOAD FILE =====
   async function uploadFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "*/*";
-    fileInput.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const content = reader.result.split(",")[1]; // base64
-        try {
-          await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${file.name}`, "PUT", {
-            message: `Upload file ${file.name}`,
-            content: content
-          });
-          log(`✅ File ${file.name} berhasil diupload.`, "success");
-          document.getElementById("loadRepoBtn").click();
-        } catch (err) { log("❌ Error upload file: " + err.message, "error"); }
-      };
-      reader.readAsDataURL(file);
+    const file = document.getElementById("fileUpload").files[0];
+    if (!file) return log("⚠️ Pilih file dulu!", "error");
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const content = reader.result.split(",")[1];
+      const url = `https://api.github.com/repos/${username()}/${currentRepo}/contents/${file.name}`;
+      try {
+        await apiRequest(url, "PUT", {
+          message: "Upload file via File Manager",
+          content
+        });
+        log(`✅ File ${file.name} berhasil diupload.`, "success");
+      } catch (e) {
+        log("❌ Error upload file: " + e.message, "error");
+      }
     };
-    fileInput.click();
+    reader.readAsDataURL(file);
+  }
+
+  // ===== CREATE REPO =====
+  async function createRepo() {
+    const repoName = fileNameInput.value.trim();
+    if (!token) return log("⚠️ Token belum diset!", "error");
+    if (!repoName) return log("⚠️ Nama repo wajib!", "error");
+
+    try {
+      await apiRequest("https://api.github.com/user/repos", "POST", {
+        name: repoName,
+        private: false,
+        description: "Repo dibuat via GitHub File Manager"
+      });
+      log(`✅ Repo ${repoName} berhasil dibuat.`, "success");
+      loadRepos(); // refresh daftar repo
+      fileNameInput.value = "";
+    } catch (e) {
+      log("❌ Error buat repo: " + e.message, "error");
+    }
+  }
+
+  // ===== USERNAME (ambil dari token) =====
+  function username() {
+    // Hack: parse dari repoSelect option owner
+    // Kalau perlu lebih pasti → panggil https://api.github.com/user
+    const firstRepo = repoSelect.options[1];
+    return firstRepo ? firstRepo.textContent.split("/")[0] : "";
   }
 
   // ===== ACTION DROPDOWN =====
   window.runAction = function () {
-    const action = document.getElementById("actionMenu").value;
+    const action = actionMenu.value;
     switch (action) {
       case "create": createFile(); break;
       case "edit": editFile(); break;
       case "delete": deleteFile(); break;
       case "uploadFileBtn": uploadFile(); break;
+      case "createRepo": createRepo(); break;
       default: alert("⚠️ Pilih aksi dulu!");
     }
   };
 
-  // ===== COPY & FULLSCREEN =====
-  window.copyCode = function () {
-    fileContentInput.select();
-    document.execCommand("copy");
-    alert("✅ Isi berhasil disalin!");
-  };
-
-  window.toggleFullscreen = function () {
-    document.getElementById("codeBox").classList.toggle("fullscreen");
-  };
-
-  // ===== DARK/LIGHT MODE =====
-  const toggleBtn = document.getElementById("modeToggle");
-  toggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("light");
-    document.body.classList.toggle("dark");
-    toggleBtn.textContent = document.body.classList.contains("dark") ? "🌞 Mode" : "🌙 Mode";
+  // ===== INIT =====
+  document.getElementById("setTokenBtn").addEventListener("click", () => {
+    token = document.getElementById("tokenInput").value.trim();
+    if (!token) return log("⚠️ Token kosong!", "error");
+    log("🔑 Token diset.");
+    loadRepos();
   });
 });
