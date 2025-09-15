@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("createRepo")?.addEventListener("click", async () => {
     const repoName = fileNameInput.value.trim();
     if (!token) return log("⚠️ Token belum diset!", "error");
-    if (!repoName) return log("⚠️ Nama repo wajib! Buat nama repo di kolom : Name File/Golder", "error");
+    if (!repoName) return log("⚠️ Nama repo wajib! Buat nama repo di kolom : Name File/Folder, Contoh : Github - Kemudian tekan tombol : Buat Repo", "error");
     try {
       await apiRequest("https://api.github.com/user/repos", "POST", {
         name: repoName,
