@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="manifest" href="/manifest.json" />
 <link rel="stylesheet" href="style.css"/>
+
 <title>GitHub File Manager</title>
 </head>
 <body class="dark">
@@ -27,6 +28,8 @@
   <!-- Repo -->
   <div class="form-row">
     <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
+    
+     <button id="createRepo">Buat Repo</button>
     <button id="loadRepoBtn">Load Repo</button>
   </div>
 
@@ -53,8 +56,9 @@
       <option value="create">➕ Buat File</option>
       <option value="edit">✏️ Edit File</option>
       <option value="delete">🗑️ Hapus File</option>
+            <option value="createFolder">📂 Buat Folder</option>
       <option value="uploadFileBtn">📂 Upload File</option>
-    <option value="createRepo">📦 Buat Repo</option></select>
+    </select>
     <button onclick="runAction()">Jalankan</button>
   </div>
 </div>
