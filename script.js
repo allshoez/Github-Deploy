@@ -1,186 +1,181 @@
-// === Variabel global ===
-let token = "";
-let currentRepo = "";
-let currentPath = "";
-let renameTarget = null;
+// ===================== GLOBAL STATE =====================
+let repos = {};          // penyimpanan repo -> { repoName: { files: [], folders: [] } }
+let currentRepo = null;  // repo aktif sekarang
 
-// === Helper ===
-function log(msg) {
-  const out = document.getElementById("output");
-  out.innerHTML += `<p>${msg}</p>`;
-  out.scrollTop = out.scrollHeight;
+// ===================== INIT =====================
+window.onload = () => {
+  loadReposFromStorage();
+  renderRepoOptions();
+};
+
+// ===================== STORAGE =====================
+function saveReposToStorage() {
+  localStorage.setItem("repos", JSON.stringify(repos));
 }
 
-function setToken() {
-  token = document.getElementById("tokenInput").value.trim();
-  if (!token) {
-    alert("Masukkan token dulu!");
+function loadReposFromStorage() {
+  const data = localStorage.getItem("repos");
+  repos = data ? JSON.parse(data) : {};
+}
+
+// ===================== RENDER =====================
+function renderRepoOptions() {
+  const repoSelect = document.getElementById("repoSelect");
+  repoSelect.innerHTML = `<option value="">-- Pilih Repo --</option>`;
+  Object.keys(repos).forEach(repoName => {
+    const opt = document.createElement("option");
+    opt.value = repoName;
+    opt.textContent = repoName;
+    repoSelect.appendChild(opt);
+  });
+}
+
+function renderRepoContent() {
+  const repoContent = document.getElementById("repoContent");
+  repoContent.innerHTML = "";
+
+  if (!currentRepo) {
+    repoContent.innerHTML = "<p>Belum ada repo dipilih.</p>";
     return;
   }
-  localStorage.setItem("gh_token", token);
-  log("✅ Token disimpan.");
-  loadRepos();
+
+  const repo = repos[currentRepo];
+
+  const filesList = document.createElement("div");
+  filesList.innerHTML = `<h3>📄 File</h3>`;
+  repo.files.forEach(file => {
+    const item = document.createElement("div");
+    item.textContent = file;
+    filesList.appendChild(item);
+  });
+
+  const foldersList = document.createElement("div");
+  foldersList.innerHTML = `<h3>📂 Folder</h3>`;
+  repo.folders.forEach(folder => {
+    const item = document.createElement("div");
+    item.textContent = folder;
+    foldersList.appendChild(item);
+  });
+
+  repoContent.appendChild(filesList);
+  repoContent.appendChild(foldersList);
 }
 
-function loadRepos() {
-  // Dummy: tampilkan beberapa repo contoh
+// ===================== REPO =====================
+document.getElementById("loadRepoBtn").addEventListener("click", () => {
   const repoSelect = document.getElementById("repoSelect");
-  repoSelect.innerHTML = `<option value="">-- Pilih Repo --</option>
-    <option value="repo1">repo1</option>
-    <option value="repo2">repo2</option>
-    <option value="repo3">repo3</option>`;
-  log("📦 Repo berhasil dimuat.");
-}
+  const repoName = repoSelect.value;
 
-function loadRepoContent() {
-  const repoSelect = document.getElementById("repoSelect");
-  currentRepo = repoSelect.value;
+  if (!repoName) {
+    alert("Pilih repo dulu!");
+    return;
+  }
+
+  if (!repos[repoName]) {
+    repos[repoName] = { files: [], folders: [] };
+    saveReposToStorage();
+  }
+
+  currentRepo = repoName;
+  renderRepoContent();
+});
+
+// Jalankan aksi khusus repo
+document.getElementById("runRepoAction").addEventListener("click", () => {
+  const action = document.getElementById("repoAction").value;
+
+  if (action === "createRepo") {
+    const repoName = prompt("Masukkan nama repo baru:");
+    if (repoName && !repos[repoName]) {
+      repos[repoName] = { files: [], folders: [] };
+      saveReposToStorage();
+      renderRepoOptions();
+      alert("Repo berhasil dibuat!");
+    }
+  }
+
+  if (action === "renameRepo") {
+    if (!currentRepo) return alert("Pilih repo dulu!");
+    const newName = prompt("Masukkan nama baru:", currentRepo);
+    if (newName && !repos[newName]) {
+      repos[newName] = repos[currentRepo];
+      delete repos[currentRepo];
+      currentRepo = newName;
+      saveReposToStorage();
+      renderRepoOptions();
+      renderRepoContent();
+      alert("Repo berhasil di-rename!");
+    }
+  }
+
+  if (action === "deleteRepo") {
+    if (!currentRepo) return alert("Pilih repo dulu!");
+    if (confirm(`Hapus repo "${currentRepo}"?`)) {
+      delete repos[currentRepo];
+      currentRepo = null;
+      saveReposToStorage();
+      renderRepoOptions();
+      renderRepoContent();
+      alert("Repo berhasil dihapus!");
+    }
+  }
+
+  document.getElementById("repoAction").value = "";
+});
+
+// ===================== FILE/FOLDER =====================
+function runAction() {
+  const action = document.getElementById("actionMenu").value;
   if (!currentRepo) {
     alert("Pilih repo dulu!");
     return;
   }
-  log(`📂 Isi repo <b>${currentRepo}</b> dimuat.`);
-
-  const repoContent = document.getElementById("repoContent");
-  repoContent.innerHTML = `
-    <ul>
-      <li>📄 index.html</li>
-      <li>📄 style.css</li>
-      <li>📂 assets/</li>
-    </ul>
-  `;
-}
-
-// === Repo Actions ===
-function runRepoAction() {
-  const action = document.getElementById("repoAction").value;
-  if (!action) {
-    alert("Pilih aksi repo!");
-    return;
-  }
-
-  if (action === "createRepo") {
-    const name = prompt("Masukkan nama repo baru:");
-    if (name) log(`✅ Repo <b>${name}</b> berhasil dibuat.`);
-  }
-
-  if (action === "renameRepo") {
-    const newName = prompt("Masukkan nama baru repo:");
-    if (newName) log(`✏️ Repo diganti jadi <b>${newName}</b>.`);
-  }
-
-  if (action === "deleteRepo") {
-    if (confirm("Yakin hapus repo ini?")) {
-      log("🗑️ Repo berhasil dihapus.");
-    }
-  }
-}
-
-// === File/Folder Actions ===
-function runAction() {
-  const action = document.getElementById("actionMenu").value;
-  if (!action) {
-    alert("Pilih aksi dulu!");
-    return;
-  }
 
   if (action === "create") {
-    const name = document.getElementById("fileNameInput").value.trim();
-    if (!name) return alert("Isi nama file!");
-    log(`✅ File <b>${name}</b> dibuat.`);
-  }
-
-  if (action === "edit") {
-    const name = document.getElementById("fileNameInput").value.trim();
-    if (!name) return alert("Isi nama file!");
-    log(`✏️ File <b>${name}</b> diedit.`);
-  }
-
-  if (action === "delete") {
-    const name = document.getElementById("fileNameInput").value.trim();
-    if (!name) return alert("Isi nama file/folder!");
-    log(`🗑️ <b>${name}</b> dihapus.`);
+    const fileName = prompt("Nama file baru:");
+    if (fileName) {
+      repos[currentRepo].files.push(fileName);
+      saveReposToStorage();
+      renderRepoContent();
+    }
   }
 
   if (action === "createFolder") {
-    const name = document.getElementById("fileNameInput").value.trim();
-    if (!name) return alert("Isi nama folder!");
-    log(`📂 Folder <b>${name}</b> dibuat.`);
-  }
-
-  if (action === "uploadFileBtn") {
-    log("📤 Upload file diproses...");
+    const folderName = prompt("Nama folder baru:");
+    if (folderName) {
+      repos[currentRepo].folders.push(folderName);
+      saveReposToStorage();
+      renderRepoContent();
+    }
   }
 
   if (action === "rename") {
-    renameTarget = document.getElementById("fileNameInput").value.trim();
-    if (!renameTarget) return alert("Pilih file/folder dulu!");
-    openRenamePopup(renameTarget);
-  }
-
-  if (action === "delletRepo") {
-    if (confirm("Yakin hapus repo ini?")) {
-      log("🗑️ Repo berhasil dihapus (dari menu File).");
+    const target = prompt("Nama file/folder yang mau di-rename:");
+    if (target) {
+      const newName = prompt("Nama baru:", target);
+      if (newName) {
+        let repo = repos[currentRepo];
+        if (repo.files.includes(target)) {
+          repo.files[repo.files.indexOf(target)] = newName;
+        } else if (repo.folders.includes(target)) {
+          repo.folders[repo.folders.indexOf(target)] = newName;
+        }
+        saveReposToStorage();
+        renderRepoContent();
+      }
     }
   }
-}
 
-// === Popup Rename ===
-function openRenamePopup(target) {
-  document.getElementById("renamePopup").style.display = "flex";
-  document.getElementById("newNameInput").value = target;
-}
-
-function closeRenamePopup() {
-  document.getElementById("renamePopup").style.display = "none";
-  renameTarget = null;
-}
-
-function confirmRename() {
-  const newName = document.getElementById("newNameInput").value.trim();
-  if (!newName) {
-    alert("Nama baru tidak boleh kosong!");
-    return;
+  if (action === "delete") {
+    const target = prompt("Nama file/folder yang mau dihapus:");
+    if (target) {
+      let repo = repos[currentRepo];
+      repo.files = repo.files.filter(f => f !== target);
+      repo.folders = repo.folders.filter(f => f !== target);
+      saveReposToStorage();
+      renderRepoContent();
+    }
   }
-  log(`✏️ ${renameTarget} diganti jadi <b>${newName}</b>.`);
-  closeRenamePopup();
+
+  document.getElementById("actionMenu").value = "";
 }
-
-// === Misc ===
-function copyCode() {
-  const txt = document.getElementById("fileContentInput");
-  txt.select();
-  document.execCommand("copy");
-  log("📋 Konten disalin.");
-}
-
-function toggleFullscreen() {
-  const box = document.getElementById("codeBox");
-  box.classList.toggle("fullscreen");
-}
-
-function toggleMode() {
-  document.body.classList.toggle("light");
-  document.body.classList.toggle("dark");
-}
-
-// === Event Listeners ===
-document.getElementById("saveTokenBtn").addEventListener("click", setToken);
-document.getElementById("loadRepoBtn").addEventListener("click", loadRepoContent);
-document.getElementById("runRepoAction").addEventListener("click", runRepoAction);
-
-document.getElementById("renameConfirmBtn").addEventListener("click", confirmRename);
-document.getElementById("renameCancelBtn").addEventListener("click", closeRenamePopup);
-
-document.getElementById("modeToggle").addEventListener("click", toggleMode);
-
-// === Init ===
-window.onload = () => {
-  const saved = localStorage.getItem("gh_token");
-  if (saved) {
-    token = saved;
-    document.getElementById("tokenInput").value = token;
-    log("🔑 Token ditemukan dari localStorage.");
-    loadRepos();
-  }
-};
