@@ -5,118 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="manifest" href="/manifest.json" />
 <link rel="stylesheet" href="style.css"/>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; }
-.container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-header h1 { font-size:1.8rem; }
-header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; }
-.terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; }
-body.light .terminal { background:#eee; color:#000; }
-.form-row { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
-input[type=text], select, button { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; }
-body.light input, body.light select { border:1px solid #aaa; }
-#fileNameInput { width:100%; font-size:1rem; padding:10px; }
-#repoContent { margin:5px 0; padding:10px; border:1px solid #444; border-radius:6px; }
-#repoContent ul { list-style:none; padding-left:10px; margin-top:5px; }
-#repoContent li { padding:4px 0; font-size:1rem; }
-.code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:40px; }
-.code-box textarea { width:100%; min-height:220px; background:transparent; color:#dcdcdc; border:none; outline:none; padding:12px; resize:vertical; font-family:monospace; font-size:1rem; line-height:1.5; }
-.code-actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
-.code-actions button { background:#333; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:14px; }
-.code-actions button:hover { background:#555; }
-.fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: #1e1e1e; border:none; border-radius:0; padding:0; display:flex; flex-direction:column; }
-.fullscreen textarea { flex: 1; width:100%; height:100%; padding:15px; font-size:1.2rem; resize:none; background:transparent; color:#dcdcdc; border:none; outline:none; line-height:1.5; }
-.fullscreen .code-actions { position:absolute; top:10px; right:10px; z-index:10000; }
-#fileActions { display:flex; gap:5px; margin-top:10px; flex-wrap:wrap; }
-#fileActions button { flex:1; text-align:center; padding:10px; font-size:1rem; cursor:pointer; }
-body.dark { background:#000; color:limegreen; }
-body.dark input, body.dark select, body.dark textarea, body.dark button { background:#000; color:limegreen; border-color:limegreen; }
-body.dark button:hover { background:limegreen; color:black; }
-body.light { background:#fff; color:#000; }
-body.light input, body.light select, body.light textarea { background:#fff; color:#000; }
-body.light button { background:#3399ff; color:#fff; border-color:#3399ff; }
-body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; }
-.terminal::-webkit-scrollbar, textarea::-webkit-scrollbar { width:8px; height:8px; }
-.terminal::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb { background:#666; border-radius:4px; }
-.terminal::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover { background:#888; }
-@media screen and (max-width:600px){
-  .form-row { flex-direction:column; }
-  .code-box textarea { min-height:160px; font-size:1rem; }
-  header h1 { font-size:1.4rem; }
-  header button { font-size:0.9rem; padding:5px 10px; }
-}
-option { text-align:center; }
-
-/* === Popup Rename === */
-#renamePopup {
-  display: none; /* default sembunyi */
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-}
-
-#renamePopupContent {
-  background: #1e1e1e;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  text-align: center;
-}
-
-#renamePopupContent p {
-  margin-bottom: 10px;
-  font-size: 1.2rem;
-}
-
-#renamePopupContent input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #444;
-  margin-bottom: 15px;
-  font-size: 1rem;
-  background: #111;
-  color: #0f0;
-}
-
-body.light #renamePopupContent {
-  background: #fff;
-  color: #000;
-}
-
-body.light #renamePopupContent input {
-  background: #fff;
-  color: #000;
-  border: 1px solid #aaa;
-}
-
-#renamePopupContent button {
-  flex: 1;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-#renameConfirmBtn {
-  background: #2ca02c;
-  color: #fff;
-}
-
-#renameCancelBtn {
-  background: #d9534f;
-  color: #fff;
-}
-</style>
 <title>GitHub File Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;display:flex;flex-direction:column;min-height:100vh;font-size:16px}
+.container{flex:1;max-width:1000px;margin:auto;padding:10px;display:flex;flex-direction:column}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+header h1{font-size:1.8rem}
+header button{padding:6px 12px;border-radius:6px;cursor:pointer;border:none;font-size:1rem}
+.terminal{flex:1;background:#111;color:#0f0;padding:10px;margin-bottom:10px;border-radius:6px;overflow-y:auto;font-size:1rem;line-height:1.5}
+.form-row{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+input[type=text],select,button{padding:10px;border-radius:6px;border:1px solid #444;font-family:monospace;font-size:1rem;flex:1}
+#fileNameInput{width:100%;font-size:1rem;padding:10px}
+#repoContent{margin:5px 0;padding:10px;border:1px solid #444;border-radius:6px}
+#repoContent ul{list-style:none;padding-left:10px;margin-top:5px}
+#repoContent li{padding:4px 0;font-size:1rem;cursor:pointer}
+.code-box{position:relative;border:1px solid #333;border-radius:6px;background:#1e1e1e;margin:10px 0;padding-top:40px}
+.code-box textarea{width:100%;min-height:220px;background:transparent;color:#dcdcdc;border:none;outline:none;padding:12px;resize:vertical;font-family:monospace;font-size:1rem;line-height:1.5}
+.code-actions{position:absolute;top:5px;right:5px;display:flex;gap:5px}
+.code-actions button{background:#333;color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:14px}
+.fullscreen{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#1e1e1e;border:none;border-radius:0;padding:0;display:flex;flex-direction:column}
+.fullscreen textarea{flex:1;width:100%;height:100%;padding:15px;font-size:1.2rem;resize:none;background:transparent;color:#dcdcdc;border:none;outline:none;line-height:1.5}
+.fullscreen .code-actions{position:absolute;top:10px;right:10px;z-index:10000}
+#fileActions{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+#fileActions button{flex:1;text-align:center;padding:10px;font-size:1rem;cursor:pointer}
+body.dark{background:#000;color:limegreen}
+body.dark input,body.dark select,body.dark textarea,body.dark button{background:#000;color:limegreen;border-color:limegreen}
+body.light{background:#fff;color:#000}
+body.light input,body.light select,body.light textarea{background:#fff;color:#000}
+body.light button{background:#3399ff;color:#fff;border-color:#3399ff}
+.terminal::-webkit-scrollbar,textarea::-webkit-scrollbar{width:8px;height:8px}
+.terminal::-webkit-scrollbar-thumb,textarea::-webkit-scrollbar-thumb{background:#666;border-radius:4px}
+.terminal::-webkit-scrollbar-thumb:hover,textarea::-webkit-scrollbar-thumb:hover{background:#888}
+@media screen and (max-width:600px){
+.form-row{flex-direction:column}
+.code-box textarea{min-height:160px;font-size:1rem}
+header h1{font-size:1.4rem}
+header button{font-size:0.9rem;padding:5px 10px}
+}
+option{text-align:center}
+/* Popup Rename */
+#renamePopup{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center}
+#renamePopupContent{background:#1e1e1e;padding:20px;border-radius:8px;width:90%;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center}
+#renamePopupContent p{margin-bottom:10px;font-size:1.2rem}
+#renamePopupContent input{width:100%;padding:10px;border-radius:6px;border:1px solid #444;margin-bottom:15px;font-size:1rem;background:#111;color:#0f0}
+#renamePopupContent button{flex:1;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:1rem}
+#renameConfirmBtn{background:#2ca02c;color:#fff}
+#renameCancelBtn{background:#d9534f;color:#fff}
+</style>
 </head>
 <body class="dark">
 <div class="container">
@@ -133,13 +69,14 @@ body.light #renamePopupContent input {
     <button id="saveTokenBtn">Set Token</button>
   </div>
 
-  <!-- Repo -->
-<div class="form-row">
-    <select id="repoSelect"><option value="">-- Menu --</option>
-    <option id="createRepo">Buat Repo</option>
- <option id="renameRepo">Rename Repo</option>
- <option id="deleteRepo">Hapus Repo</option>
-    <option id="loadRepoBtn">Load Repo</ootion></select>
+  <!-- Repo Menu -->
+  <div class="form-row">
+    <select id="repoSelect">
+      <option value="">-- Menu --</option>
+      <option value="createRepo">➕ Buat Repo</option>
+      <option value="renameRepo">📝 Rename Repo</option>
+      <option value="deleteRepo">🗑️ Hapus Repo</option>
+    </select>
   </div>
 
   <!-- File Area -->
@@ -155,7 +92,7 @@ body.light #renamePopupContent input {
     <div id="fileList"></div>
   </div>
 
-  <!-- Action Dropdown -->
+  <!-- Action Menu -->
   <div class="form-row">
     <select id="actionMenu">
       <option value="">-- Pilih Aksi --</option>
@@ -165,7 +102,6 @@ body.light #renamePopupContent input {
       <option value="createFolder">📂 Buat Folder</option>
       <option value="uploadFileBtn">📂 Upload File</option>
       <option value="rename">📝 Rename File/Folder</option>
-      <option value="delletRepo">📦 Hapus Repo</option>
     </select>
     <button onclick="runAction()">Jalankan</button>
   </div>
@@ -176,7 +112,7 @@ body.light #renamePopupContent input {
   <div id="renamePopupContent">
     <p>Rename File/Folder</p>
     <input id="newNameInput" placeholder="Nama baru"/>
-    <div style="display:flex;gap:10px;">
+    <div style="display:flex;gap:10px;justify-content:center;">
       <button id="renameConfirmBtn">Rename</button>
       <button id="renameCancelBtn">Batal</button>
     </div>
