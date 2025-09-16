@@ -1,119 +1,187 @@
-<script>
-document.addEventListener("DOMContentLoaded",()=>{
-let token="",currentRepo="",editingFile="",deleteConfirm=false;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="manifest" href="/manifest.json" />
+<link rel="stylesheet" href="style.css"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; }
+.container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+header h1 { font-size:1.8rem; }
+header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; }
+.terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; }
+body.light .terminal { background:#eee; color:#000; }
+.form-row { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
+input[type=text], select, button { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; }
+body.light input, body.light select { border:1px solid #aaa; }
+#fileNameInput { width:100%; font-size:1rem; padding:10px; }
+#repoContent { margin:5px 0; padding:10px; border:1px solid #444; border-radius:6px; }
+#repoContent ul { list-style:none; padding-left:10px; margin-top:5px; }
+#repoContent li { padding:4px 0; font-size:1rem; }
+.code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:40px; }
+.code-box textarea { width:100%; min-height:220px; background:transparent; color:#dcdcdc; border:none; outline:none; padding:12px; resize:vertical; font-family:monospace; font-size:1rem; line-height:1.5; }
+.code-actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
+.code-actions button { background:#333; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:14px; }
+.code-actions button:hover { background:#555; }
+.fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: #1e1e1e; border:none; border-radius:0; padding:0; display:flex; flex-direction:column; }
+.fullscreen textarea { flex: 1; width:100%; height:100%; padding:15px; font-size:1.2rem; resize:none; background:transparent; color:#dcdcdc; border:none; outline:none; line-height:1.5; }
+.fullscreen .code-actions { position:absolute; top:10px; right:10px; z-index:10000; }
+#fileActions { display:flex; gap:5px; margin-top:10px; flex-wrap:wrap; }
+#fileActions button { flex:1; text-align:center; padding:10px; font-size:1rem; cursor:pointer; }
+body.dark { background:#000; color:limegreen; }
+body.dark input, body.dark select, body.dark textarea, body.dark button { background:#000; color:limegreen; border-color:limegreen; }
+body.dark button:hover { background:limegreen; color:black; }
+body.light { background:#fff; color:#000; }
+body.light input, body.light select, body.light textarea { background:#fff; color:#000; }
+body.light button { background:#3399ff; color:#fff; border-color:#3399ff; }
+body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; }
+.terminal::-webkit-scrollbar, textarea::-webkit-scrollbar { width:8px; height:8px; }
+.terminal::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb { background:#666; border-radius:4px; }
+.terminal::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover { background:#888; }
+@media screen and (max-width:600px){
+  .form-row { flex-direction:column; }
+  .code-box textarea { min-height:160px; font-size:1rem; }
+  header h1 { font-size:1.4rem; }
+  header button { font-size:0.9rem; padding:5px 10px; }
+}
+option { text-align:center; }
 
-const output=document.getElementById("output");
-const repoSelect=document.getElementById("repoSelect");
-const fileNameInput=document.getElementById("fileNameInput");
-const fileContentInput=document.getElementById("fileContentInput");
-const renamePopup=document.getElementById("renamePopup");
-const newNameInput=document.getElementById("newNameInput");
-
-// ===== LOG =====
-function log(msg,type="info"){
-  const p=document.createElement("p");
-  p.textContent=msg;
-  p.style.color=(type==="success")?"#0f0":(type==="error")?"#f33":"#0af";
-  output.appendChild(p); output.scrollTop=output.scrollHeight;
+/* === Popup Rename === */
+#renamePopup {
+  display: none; /* default sembunyi */
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-// ===== API =====
-async function apiRequest(url,method="GET",body=null){
-  const headers={Authorization:`token ${token}`,Accept:"application/vnd.github.v3+json"};
-  if(body) headers["Content-Type"]="application/json";
-  const res=await fetch(url,{method,headers,body:body?JSON.stringify(body):null});
-
-  if(res.status===204) return {}; // no content
-  try{
-    return await res.json();
-  }catch{
-    return {};
-  }
+#renamePopupContent {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  text-align: center;
 }
 
-// ===== TOKEN =====
-document.getElementById("saveTokenBtn").addEventListener("click",()=>{
-  token=document.getElementById("tokenInput").value.trim();
-  if(token){log("✅ Token disimpan!","success");loadRepos();}
-  else log("⚠️ Masukkan token!","error");
-});
-
-// ===== LOAD REPOS =====
-async function loadRepos(){
-  try{
-    log("🔄 Memuat daftar repository...","info");
-    const repos=await apiRequest("https://api.github.com/user/repos");
-    console.log("Repos response:",repos); // Debug
-    repoSelect.innerHTML='<option value="">-- Pilih Repo --</option>';
-    repos.forEach(r=>{
-      const opt=document.createElement("option");
-      opt.value=r.full_name;
-      opt.textContent=r.full_name;
-      repoSelect.appendChild(opt);
-    });
-    log("✅ Repo berhasil dimuat.","success");
-  }catch(e){log("❌ Gagal load repo: "+e.message,"error");}
+#renamePopupContent p {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
 }
 
-// ===== LOAD REPO CONTENT =====
-document.getElementById("loadRepoBtn").addEventListener("click",async()=>{
-  currentRepo=repoSelect.value;
-  if(!currentRepo)return log("⚠️ Pilih repo dulu!","error");
-  try{
-    log(`📂 Memuat isi repo: ${currentRepo} ...`,"info");
-    const files=await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/`);
-    renderRepoContent(files);
-  }catch(e){log("❌ Error load repo: "+e.message,"error");}
-});
-
-function renderRepoContent(files){
-  const repoDiv=document.getElementById("fileList");
-  repoDiv.innerHTML="<ul>"+files.map(f=>`<li onclick="fileNameInput.value='${f.name}'">${f.type==='dir'?'📁':'📄'} ${f.name}</li>`).join("")+"</ul>";
+#renamePopupContent input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  background: #111;
+  color: #0f0;
 }
 
-// ===== CRUD + Upload + Folder + Rename + Delete Repo =====
-async function createFile(){if(!currentRepo)return log("⚠️ Pilih repo dulu!","error");const name=fileNameInput.value.trim();const content=fileContentInput.value||"# File baru\n";if(!name)return log("⚠️ Nama file wajib!","error");try{const encoded=btoa(unescape(encodeURIComponent(content)));await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`,"PUT",{message:`Buat file ${name}`,content:encoded});log(`✅ File ${name} berhasil dibuat.`,"success");fileContentInput.value="";document.getElementById("loadRepoBtn").click();}catch(e){log("❌ Error buat file: "+e.message,"error");}}
-async function editFile(){if(!currentRepo)return log("⚠️ Pilih repo dulu!","error");const name=fileNameInput.value.trim();if(!name)return log("⚠️ Nama file wajib!","error");if(editingFile!==name){try{const fileData=await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);fileContentInput.value=decodeURIComponent(escape(atob(fileData.content.replace(/\n/g,""))));editingFile=name;log(`✏️ File ${name} siap diedit. Tekan Edit File lagi untuk menyimpan.`,"info");}catch(e){log("❌ Error ambil file: "+e.message,"error");}}else{try{const fileData=await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);const encoded=btoa(unescape(encodeURIComponent(fileContentInput.value||"# File kosong\n")));await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`,"PUT",{message:`Edit file ${name}`,content:encoded,sha:fileData.sha});log(`✅ File ${name} berhasil diedit.`,"success");editingFile="";fileContentInput.value="";document.getElementById("loadRepoBtn").click();}catch(e){log("❌ Error edit file: "+e.message,"error");}}}
-async function deleteFile(){if(!currentRepo)return log("⚠️ Pilih repo dulu!","error");const name=fileNameInput.value.trim();if(!name)return log("⚠️ Nama file wajib!","error");if(!deleteConfirm||editingFile!==name){deleteConfirm=true;editingFile=name;log("⚠️ Tekan Hapus File lagi untuk konfirmasi.","info");return;}try{const fileData=await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`,"DELETE",{message:`Hapus file ${name}`,sha:fileData.sha});log(`✅ File ${name} berhasil dihapus.`,"success");deleteConfirm=false;editingFile="";fileContentInput.value="";document.getElementById("loadRepoBtn").click();}catch(e){log("❌ Error hapus file: "+e.message,"error");deleteConfirm=false;editingFile="";}}
-async function createFolder(){if(!currentRepo)return log("⚠️ Pilih repo dulu!","error");const name=fileNameInput.value.trim();if(!name)return log("⚠️ Nama folder wajib!","error");try{const encoded=btoa(unescape(encodeURIComponent("# Folder kosong")));await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}/.gitkeep`,"PUT",{message:`Buat folder ${name}`,content:encoded});log(`✅ Folder ${name} berhasil dibuat.`,"success");document.getElementById("loadRepoBtn").click();}catch(e){log("❌ Error buat folder: "+e.message,"error");}}
-async function uploadFile(){if(!currentRepo)return log("⚠️ Pilih repo dulu!","error");const fileInput=document.createElement("input");fileInput.type="file";fileInput.accept="*/*";fileInput.onchange=async(e)=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{const content=reader.result.split(",")[1];try{await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${file.name}`,"PUT",{message:`Upload file ${file.name}`,content:content});log(`✅ File ${file.name} berhasil diupload.`,"success");document.getElementById("loadRepoBtn").click();}catch(err){log("❌ Error upload file: "+err.message,"error");}};reader.readAsDataURL(file);};fileInput.click();}
-async function deleteRepo(){if(!currentRepo) return log("⚠️ Pilih repo dulu!","error");if(!deleteConfirm){deleteConfirm=true;log(`⚠️ Tekan Hapus Repo lagi untuk konfirmasi.`,"info");return;}try{await apiRequest(`https://api.github.com/repos/${currentRepo}`,"DELETE");log(`✅ Repo ${currentRepo} berhasil dihapus.`,"success");deleteConfirm=false;currentRepo="";repoSelect.value="";document.getElementById("loadRepoBtn").click();}catch(e){log("❌ Error hapus repo: "+e.message,"error");deleteConfirm=false;}}
-async function renameItem(){if(!currentRepo) return log("⚠️ Pilih repo dulu!","error");const oldName=fileNameInput.value.trim();const newName=newNameInput.value.trim();if(!oldName||!newName)return log("⚠️ Nama lama dan baru wajib!","error");try{const fileData=await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${oldName}`);const encoded=btoa(unescape(encodeURIComponent(fileContentInput.value||"# Kosong\n")));await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${newName}`,"PUT",{message:`Rename ${oldName} -> ${newName}`,content:encoded,sha:fileData.sha});await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${oldName}`,"DELETE",{message:`Hapus ${oldName}`,sha:fileData.sha});log(`✅ ${oldName} berhasil di rename menjadi ${newName}`,"success");renamePopup.style.display="none";fileNameInput.value=newName;document.getElementById("loadRepoBtn").click();}catch(e){log("❌ Error rename: "+e.message,"error");renamePopup.style.display="none";}}
+body.light #renamePopupContent {
+  background: #fff;
+  color: #000;
+}
 
-// ===== ACTION DROPDOWN =====
-window.runAction=function(){
-  const action=document.getElementById("actionMenu").value;
-  switch(action){
-    case "create": createFile(); break;
-    case "edit": editFile(); break;
-    case "delete": deleteFile(); break;
-    case "uploadFileBtn": uploadFile(); break;
-    case "createFolder": createFolder(); break;
-    case "rename": 
-      if(!fileNameInput.value.trim()){log("⚠️ Pilih file/folder dulu!","error");return;}
-      newNameInput.value=fileNameInput.value.trim();
-      renamePopup.style.display="flex"; 
-      break;
-    case "delletRepo": deleteRepo(); break;
-    default: alert("⚠️ Pilih aksi dulu!");
-  }
-};
+body.light #renamePopupContent input {
+  background: #fff;
+  color: #000;
+  border: 1px solid #aaa;
+}
 
-// ===== COPY & FULLSCREEN =====
-window.copyCode=function(){fileContentInput.select();document.execCommand("copy");alert("✅ Isi berhasil disalin!");};
-window.toggleFullscreen=function(){document.getElementById("codeBox").classList.toggle("fullscreen");};
+#renamePopupContent button {
+  flex: 1;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
 
-// ===== DARK/LIGHT MODE =====
-const toggleBtn=document.getElementById("modeToggle");
-toggleBtn.addEventListener("click",()=>{
-  document.body.classList.toggle("light");
-  document.body.classList.toggle("dark");
-  toggleBtn.textContent=document.body.classList.contains("dark")?"🌞 Mode":"🌙 Mode";
-});
+#renameConfirmBtn {
+  background: #2ca02c;
+  color: #fff;
+}
 
-// ===== POPUP RENAME =====
-document.getElementById("renameConfirmBtn").addEventListener("click",renameItem);
-document.getElementById("renameCancelBtn").addEventListener("click",()=>{renamePopup.style.display="none";});
+#renameCancelBtn {
+  background: #d9534f;
+  color: #fff;
+}
+</style>
+<title>GitHub File Manager</title>
+</head>
+<body class="dark">
+<div class="container">
+  <header>
+    <h1>GitHub File Manager</h1>
+    <button id="modeToggle">☀️ Mode</button>
+  </header>
 
-});
-</script>
+  <div id="output" class="terminal"><p>Selamat datang!</p></div>
+
+  <!-- Token -->
+  <div class="form-row">
+    <input type="text" id="tokenInput" placeholder="Token ghp_xxx"/>
+    <button id="saveTokenBtn">Set Token</button>
+  </div>
+
+  <!-- Repo -->
+  <div class="form-row">
+    <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
+    <button id="createRepo">Buat Repo</button>
+    <button id="loadRepoBtn">Load Repo</button>
+  </div>
+
+  <!-- File Area -->
+  <div id="repoContent">
+    <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
+    <div class="code-box" id="codeBox">
+      <div class="code-actions">
+        <button onclick="copyCode()">📋</button>
+        <button onclick="toggleFullscreen()">🔲</button>
+      </div>
+      <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
+    </div>
+    <div id="fileList"></div>
+  </div>
+
+  <!-- Action Dropdown -->
+  <div class="form-row">
+    <select id="actionMenu">
+      <option value="">-- Pilih Aksi --</option>
+      <option value="create">➕ Buat File</option>
+      <option value="edit">✏️ Edit File</option>
+      <option value="delete">🗑️ Hapus File</option>
+      <option value="createFolder">📂 Buat Folder</option>
+      <option value="uploadFileBtn">📂 Upload File</option>
+      <option value="rename">📝 Rename File/Folder</option>
+      <option value="delletRepo">📦 Hapus Repo</option>
+    </select>
+    <button onclick="runAction()">Jalankan</button>
+  </div>
+</div>
+
+<!-- Popup Rename -->
+<div id="renamePopup">
+  <div id="renamePopupContent">
+    <p>Rename File/Folder</p>
+    <input id="newNameInput" placeholder="Nama baru"/>
+    <div style="display:flex;gap:10px;">
+      <button id="renameConfirmBtn">Rename</button>
+      <button id="renameCancelBtn">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
