@@ -116,3 +116,76 @@ document.getElementById("renameConfirmBtn").addEventListener("click",renameItem)
 document.getElementById("renameCancelBtn").addEventListener("click",()=>{renamePopup.style.display="none";});
 
 });
+
+// --- Popup Rename ---
+function showRenamePopup(oldPath) {
+  document.getElementById("renamePopup").style.display = "flex";
+  document.getElementById("newNameInput").value = oldPath.split("/").pop(); // isi default nama lama
+
+  document.getElementById("renameConfirmBtn").onclick = async () => {
+    const newName = document.getElementById("newNameInput").value.trim();
+    if (!newName) {
+      log("❌ Nama baru tidak boleh kosong");
+      return;
+    }
+    await renameItem(oldPath, newName);
+    document.getElementById("renamePopup").style.display = "none";
+  };
+
+  document.getElementById("renameCancelBtn").onclick = () => {
+    document.getElementById("renamePopup").style.display = "none";
+  };
+}
+
+// fungsi rename file/folder
+async function renameItem(oldPath, newName) {
+  const repo = document.getElementById("repoSelect").value;
+  if (!repo) return log("❌ Pilih repo dulu");
+  const token = localStorage.getItem("gh_token");
+  if (!token) return log("❌ Token belum diset");
+
+  const newPath = oldPath.split("/").slice(0, -1).concat(newName).join("/");
+  log(`🔄 Rename ${oldPath} → ${newPath} ...`);
+
+  try {
+    // ambil file lama
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${oldPath}`, {
+      headers: { Authorization: `token ${token}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal ambil file lama");
+
+    // buat file baru di path baru
+    const create = await fetch(`https://api.github.com/repos/${repo}/contents/${newPath}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: `Rename ${oldPath} → ${newPath}`,
+        content: data.content,
+        sha: undefined
+      })
+    });
+    if (!create.ok) throw new Error("Gagal buat file baru");
+
+    // hapus file lama
+    await fetch(`https://api.github.com/repos/${repo}/contents/${oldPath}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `token ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: `Remove old file ${oldPath}`,
+        sha: data.sha
+      })
+    });
+
+    log(`✅ Berhasil rename ${oldPath} → ${newPath}`);
+    loadRepo();
+  } catch (e) {
+    log("❌ Error rename: " + e.message);
+  }
+}
