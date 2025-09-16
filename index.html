@@ -134,14 +134,31 @@ body.light #renamePopupContent input {
   </div>
 
   <!-- Repo -->
+<!-- Pilih Repo -->
 <div class="form-row">
-  <select id="repoSelect"><option value="">-- Menu Repo --</option>
-  <option id="createRepo">Buat Repo</bption>
-  <option id="renameRepo">Rename Repo</bption>
-  <option id="delletRepo">Hapus Repo</bption>
+  <label for="repoSelect"></label>
+  <select id="repoSelect">
+    <option value="">-- Pilih Repo --</option>
   </select>
   <button id="loadRepoBtn">Load Repo</button>
 </div>
+
+<!-- Aksi Repo -->
+<div class="form-row">
+  <label for="repoAction"></label>
+  <select id="repoAction">
+    <option value="">-- Menu Repo --</option>
+    <option value="createRepo">➕ Buat Repo</option>
+    <option value="renameRepo">✏️ Rename Repo</option>
+    <option value="deleteRepo">🗑️ Hapus Repo</option>
+  </select>
+  <button id="runRepoAction">Jalankan</button>
+</div>
+
+<!-- Tempat nampilin isi repo -->
+<div id="repoContent"></div>
+
+
   <!-- File Area -->
   <div id="repoContent">
     <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
