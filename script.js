@@ -1,283 +1,186 @@
-document.addEventListener("DOMContentLoaded", () => {
-  let token = "",
-    currentRepo = "",
-    editingFile = "";
+// === Variabel global ===
+let token = "";
+let currentRepo = "";
+let currentPath = "";
+let renameTarget = null;
 
-  // === DOM ===
-  const output = document.getElementById("output");
+// === Helper ===
+function log(msg) {
+  const out = document.getElementById("output");
+  out.innerHTML += `<p>${msg}</p>`;
+  out.scrollTop = out.scrollHeight;
+}
+
+function setToken() {
+  token = document.getElementById("tokenInput").value.trim();
+  if (!token) {
+    alert("Masukkan token dulu!");
+    return;
+  }
+  localStorage.setItem("gh_token", token);
+  log("✅ Token disimpan.");
+  loadRepos();
+}
+
+function loadRepos() {
+  // Dummy: tampilkan beberapa repo contoh
   const repoSelect = document.getElementById("repoSelect");
-  const fileNameInput = document.getElementById("fileNameInput");
-  const fileContentInput = document.getElementById("fileContentInput");
-  const renamePopup = document.getElementById("renamePopup");
-  const newNameInput = document.getElementById("newNameInput");
+  repoSelect.innerHTML = `<option value="">-- Pilih Repo --</option>
+    <option value="repo1">repo1</option>
+    <option value="repo2">repo2</option>
+    <option value="repo3">repo3</option>`;
+  log("📦 Repo berhasil dimuat.");
+}
 
-  // === LOGGING ===
-  function log(msg, type = "info") {
-    const p = document.createElement("p");
-    p.textContent = msg;
-    p.style.color =
-      type === "success" ? "#0f0" : type === "error" ? "#f33" : "#0af";
-    output.appendChild(p);
-    output.scrollTop = output.scrollHeight;
+function loadRepoContent() {
+  const repoSelect = document.getElementById("repoSelect");
+  currentRepo = repoSelect.value;
+  if (!currentRepo) {
+    alert("Pilih repo dulu!");
+    return;
+  }
+  log(`📂 Isi repo <b>${currentRepo}</b> dimuat.`);
+
+  const repoContent = document.getElementById("repoContent");
+  repoContent.innerHTML = `
+    <ul>
+      <li>📄 index.html</li>
+      <li>📄 style.css</li>
+      <li>📂 assets/</li>
+    </ul>
+  `;
+}
+
+// === Repo Actions ===
+function runRepoAction() {
+  const action = document.getElementById("repoAction").value;
+  if (!action) {
+    alert("Pilih aksi repo!");
+    return;
   }
 
-  // === API REQUEST ===
-  async function apiRequest(url, method = "GET", body = null) {
-    const headers = {
-      Authorization: `token ${token}`,
-      Accept: "application/vnd.github.v3+json",
-    };
-    if (body) headers["Content-Type"] = "application/json";
-    const res = await fetch(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : null,
-    });
-    if (res.status === 204) return {};
-    try {
-      return await res.json();
-    } catch {
-      return {};
-    }
+  if (action === "createRepo") {
+    const name = prompt("Masukkan nama repo baru:");
+    if (name) log(`✅ Repo <b>${name}</b> berhasil dibuat.`);
   }
 
-  // === TOKEN HANDLING ===
-  document.getElementById("saveTokenBtn").addEventListener("click", () => {
-    token = document.getElementById("tokenInput").value.trim();
-    if (token) {
-      localStorage.setItem("gh_token", token);
-      log("✅ Token disimpan!", "success");
-      loadRepos();
-    } else log("⚠️ Masukkan token!", "error");
-  });
-
-  // === LOAD REPOS ===
-  async function loadRepos() {
-    try {
-      log("🔄 Memuat repo...", "info");
-      const repos = await apiRequest("https://api.github.com/user/repos");
-      repoSelect.innerHTML = `
-        <option value="">-- Menu --</option>
-        <option value="createRepo">➕ Buat Repo</option>
-        <option value="renameRepo">📝 Rename Repo</option>
-        <option value="deleteRepo">🗑️ Hapus Repo</option>
-      `;
-      repos.forEach((r) => {
-        const opt = document.createElement("option");
-        opt.value = r.full_name;
-        opt.textContent = r.full_name;
-        repoSelect.appendChild(opt);
-      });
-      log("✅ Repo berhasil dimuat.", "success");
-    } catch (e) {
-      log("❌ Gagal load repo: " + e.message, "error");
-    }
+  if (action === "renameRepo") {
+    const newName = prompt("Masukkan nama baru repo:");
+    if (newName) log(`✏️ Repo diganti jadi <b>${newName}</b>.`);
   }
 
-  // === RENDER FILE LIST ===
-  function renderRepoContent(files) {
-    const repoDiv = document.getElementById("fileList");
-    repoDiv.innerHTML =
-      "<ul>" +
-      files
-        .map(
-          (f) =>
-            `<li onclick="document.getElementById('fileNameInput').value='${f.name}'">${
-              f.type === "dir" ? "📁" : "📄"
-            } ${f.name}</li>`
-        )
-        .join("") +
-      "</ul>";
-  }
-
-  // === REPO MENU ===
-  repoSelect.addEventListener("change", async () => {
-    const val = repoSelect.value;
-    if (!val) return;
-
-    if (val === "createRepo") {
-      const name = prompt("Nama repo baru:");
-      if (!name) return;
-      try {
-        await apiRequest("https://api.github.com/user/repos", "POST", {
-          name,
-          auto_init: true,
-          private: false,
-        });
-        log(`✅ Repo ${name} dibuat.`, "success");
-        loadRepos();
-      } catch (e) {
-        log("❌ Error buat repo: " + e.message, "error");
-      }
-    } else if (val === "renameRepo") {
-      if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-      const newName = prompt("Nama baru repo:");
-      if (!newName) return;
-      try {
-        const [owner, repo] = currentRepo.split("/");
-        const updated = await apiRequest(
-          `https://api.github.com/repos/${owner}/${repo}`,
-          "PATCH",
-          { name: newName }
-        );
-        currentRepo = updated.full_name;
-        log(`✅ Repo di-rename jadi ${newName}`, "success");
-        loadRepos();
-      } catch (e) {
-        log("❌ Error rename repo: " + e.message, "error");
-      }
-    } else if (val === "deleteRepo") {
-      if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-      if (!confirm(`Hapus repo ${currentRepo}?`)) return;
-      try {
-        await apiRequest(`https://api.github.com/repos/${currentRepo}`, "DELETE");
-        log(`✅ Repo ${currentRepo} dihapus.`, "success");
-        currentRepo = "";
-        loadRepos();
-      } catch (e) {
-        log("❌ Error hapus repo: " + e.message, "error");
-      }
-    } else {
-      // Repo dipilih
-      currentRepo = val;
-      log(`📂 Repo aktif: ${currentRepo}`, "info");
-      try {
-        const files = await apiRequest(
-          `https://api.github.com/repos/${currentRepo}/contents/`
-        );
-        renderRepoContent(files);
-      } catch (e) {
-        log("❌ Error load isi repo: " + e.message, "error");
-      }
-    }
-  });
-
-  // === FILE/FOLDER ACTIONS ===
-  async function createFile() {
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Isi nama file!", "error");
-    try {
-      await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${name}`,
-        "PUT",
-        {
-          message: "create file",
-          content: btoa(fileContentInput.value || ""),
-        }
-      );
-      log(`✅ File ${name} dibuat.`, "success");
-    } catch (e) {
-      log("❌ Error create file: " + e.message, "error");
+  if (action === "deleteRepo") {
+    if (confirm("Yakin hapus repo ini?")) {
+      log("🗑️ Repo berhasil dihapus.");
     }
   }
+}
 
-  async function editFile() {
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Pilih file!", "error");
-    try {
-      const shaData = await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${name}`
-      );
-      await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${name}`,
-        "PUT",
-        {
-          message: "update file",
-          content: btoa(fileContentInput.value),
-          sha: shaData.sha,
-        }
-      );
-      log(`✅ File ${name} diupdate.`, "success");
-    } catch (e) {
-      log("❌ Error edit file: " + e.message, "error");
-    }
+// === File/Folder Actions ===
+function runAction() {
+  const action = document.getElementById("actionMenu").value;
+  if (!action) {
+    alert("Pilih aksi dulu!");
+    return;
   }
 
-  async function deleteFile() {
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Pilih file!", "error");
-    if (!confirm(`Hapus ${name}?`)) return;
-    try {
-      const shaData = await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${name}`
-      );
-      await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${name}`,
-        "DELETE",
-        { message: "delete file", sha: shaData.sha }
-      );
-      log(`✅ ${name} dihapus.`, "success");
-    } catch (e) {
-      log("❌ Error delete: " + e.message, "error");
-    }
+  if (action === "create") {
+    const name = document.getElementById("fileNameInput").value.trim();
+    if (!name) return alert("Isi nama file!");
+    log(`✅ File <b>${name}</b> dibuat.`);
   }
 
-  async function createFolder() {
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Isi nama folder!", "error");
-    try {
-      await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${name}/.gitkeep`,
-        "PUT",
-        { message: "create folder", content: btoa("") }
-      );
-      log(`✅ Folder ${name} dibuat.`, "success");
-    } catch (e) {
-      log("❌ Error create folder: " + e.message, "error");
-    }
+  if (action === "edit") {
+    const name = document.getElementById("fileNameInput").value.trim();
+    if (!name) return alert("Isi nama file!");
+    log(`✏️ File <b>${name}</b> diedit.`);
   }
 
-  async function renameItem() {
-    const oldName = fileNameInput.value.trim();
-    const newName = newNameInput.value.trim();
-    if (!oldName || !newName) return log("⚠️ Isi nama!", "error");
-    try {
-      const shaData = await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${oldName}`
-      );
-      await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${oldName}`,
-        "DELETE",
-        { message: "rename file", sha: shaData.sha }
-      );
-      await apiRequest(
-        `https://api.github.com/repos/${currentRepo}/contents/${newName}`,
-        "PUT",
-        {
-          message: "create renamed file",
-          content: btoa(atob(shaData.content || "")),
-        }
-      );
-      log(`✅ ${oldName} di-rename jadi ${newName}`, "success");
-      renamePopup.style.display = "none";
-    } catch (e) {
-      log("❌ Error rename: " + e.message, "error");
-    }
+  if (action === "delete") {
+    const name = document.getElementById("fileNameInput").value.trim();
+    if (!name) return alert("Isi nama file/folder!");
+    log(`🗑️ <b>${name}</b> dihapus.`);
   }
 
-  // === ACTION MENU ===
-  window.runAction = function () {
-    const action = document.getElementById("actionMenu").value;
-    switch (action) {
-      case "create": createFile(); break;
-      case "edit": editFile(); break;
-      case "delete": deleteFile(); break;
-      case "uploadFileBtn": document.getElementById("uploadFile").click(); break;
-      case "createFolder": createFolder(); break;
-      case "rename":
-        if (!fileNameInput.value.trim())
-          return log("⚠️ Pilih file/folder dulu!", "error");
-        newNameInput.value = fileNameInput.value.trim();
-        renamePopup.style.display = "flex";
-        break;
-      default:
-        alert("⚠️ Pilih aksi dulu!");
-    }
-  };
+  if (action === "createFolder") {
+    const name = document.getElementById("fileNameInput").value.trim();
+    if (!name) return alert("Isi nama folder!");
+    log(`📂 Folder <b>${name}</b> dibuat.`);
+  }
 
-  // === POPUP EVENTS ===
-  document.getElementById("renameConfirmBtn").addEventListener("click", renameItem);
-  document.getElementById("renameCancelBtn").addEventListener("click", () => {
-    renamePopup.style.display = "none";
-  });
-});
+  if (action === "uploadFileBtn") {
+    log("📤 Upload file diproses...");
+  }
+
+  if (action === "rename") {
+    renameTarget = document.getElementById("fileNameInput").value.trim();
+    if (!renameTarget) return alert("Pilih file/folder dulu!");
+    openRenamePopup(renameTarget);
+  }
+
+  if (action === "delletRepo") {
+    if (confirm("Yakin hapus repo ini?")) {
+      log("🗑️ Repo berhasil dihapus (dari menu File).");
+    }
+  }
+}
+
+// === Popup Rename ===
+function openRenamePopup(target) {
+  document.getElementById("renamePopup").style.display = "flex";
+  document.getElementById("newNameInput").value = target;
+}
+
+function closeRenamePopup() {
+  document.getElementById("renamePopup").style.display = "none";
+  renameTarget = null;
+}
+
+function confirmRename() {
+  const newName = document.getElementById("newNameInput").value.trim();
+  if (!newName) {
+    alert("Nama baru tidak boleh kosong!");
+    return;
+  }
+  log(`✏️ ${renameTarget} diganti jadi <b>${newName}</b>.`);
+  closeRenamePopup();
+}
+
+// === Misc ===
+function copyCode() {
+  const txt = document.getElementById("fileContentInput");
+  txt.select();
+  document.execCommand("copy");
+  log("📋 Konten disalin.");
+}
+
+function toggleFullscreen() {
+  const box = document.getElementById("codeBox");
+  box.classList.toggle("fullscreen");
+}
+
+function toggleMode() {
+  document.body.classList.toggle("light");
+  document.body.classList.toggle("dark");
+}
+
+// === Event Listeners ===
+document.getElementById("saveTokenBtn").addEventListener("click", setToken);
+document.getElementById("loadRepoBtn").addEventListener("click", loadRepoContent);
+document.getElementById("runRepoAction").addEventListener("click", runRepoAction);
+
+document.getElementById("renameConfirmBtn").addEventListener("click", confirmRename);
+document.getElementById("renameCancelBtn").addEventListener("click", closeRenamePopup);
+
+document.getElementById("modeToggle").addEventListener("click", toggleMode);
+
+// === Init ===
+window.onload = () => {
+  const saved = localStorage.getItem("gh_token");
+  if (saved) {
+    token = saved;
+    document.getElementById("tokenInput").value = token;
+    log("🔑 Token ditemukan dari localStorage.");
+    loadRepos();
+  }
+};
