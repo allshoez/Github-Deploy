@@ -154,9 +154,6 @@ body.light #renamePopupContent input {
   <button id="runRepoAction">Jalankan</button>
 </div>
 
-<!-- Tempat nampilin isi repo -->
-<div id="repoContent"></div>
-
 
   <!-- File Area -->
   <div id="repoContent">
@@ -181,23 +178,11 @@ body.light #renamePopupContent input {
       <option value="createFolder">📂 Buat Folder</option>
       <option value="uploadFileBtn">📂 Upload File</option>
       <option value="rename">📝 Rename File/Folder</option>
-      <option value="delletRepo">📦 Hapus Repo</option>
     </select>
     <button onclick="runAction()">Jalankan</button>
   </div>
 </div>
 
-<!-- Popup Rename -->
-<div id="renamePopup">
-  <div id="renamePopupContent">
-    <p>Rename File/Folder</p>
-    <input id="newNameInput" placeholder="Nama baru"/>
-    <div style="display:flex;gap:10px;">
-      <button id="renameConfirmBtn">Rename</button>
-      <button id="renameCancelBtn">Batal</button>
-    </div>
-  </div>
-</div>
 
 <script src="script.js"></script>
 </body>
