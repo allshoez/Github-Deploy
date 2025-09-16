@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   let token = "",
     currentRepo = "",
-    editingFile = "",
-    deleteConfirm = false;
+    editingFile = "";
 
+  // === DOM ===
   const output = document.getElementById("output");
   const repoSelect = document.getElementById("repoSelect");
   const fileNameInput = document.getElementById("fileNameInput");
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const renamePopup = document.getElementById("renamePopup");
   const newNameInput = document.getElementById("newNameInput");
 
-  // ===== LOG =====
+  // === LOGGING ===
   function log(msg, type = "info") {
     const p = document.createElement("p");
     p.textContent = msg;
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     output.scrollTop = output.scrollHeight;
   }
 
-  // ===== API =====
+  // === API REQUEST ===
   async function apiRequest(url, method = "GET", body = null) {
     const headers = {
       Authorization: `token ${token}`,
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ===== TOKEN =====
+  // === TOKEN HANDLING ===
   document.getElementById("saveTokenBtn").addEventListener("click", () => {
     token = document.getElementById("tokenInput").value.trim();
     if (token) {
@@ -51,10 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
     } else log("⚠️ Masukkan token!", "error");
   });
 
-  // ===== LOAD REPOS =====
+  // === LOAD REPOS ===
   async function loadRepos() {
     try {
-      log("🔄 Memuat daftar repository...", "info");
+      log("🔄 Memuat repo...", "info");
       const repos = await apiRequest("https://api.github.com/user/repos");
       repoSelect.innerHTML = `
         <option value="">-- Menu --</option>
@@ -74,7 +74,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ===== REPO MENU =====
+  // === RENDER FILE LIST ===
+  function renderRepoContent(files) {
+    const repoDiv = document.getElementById("fileList");
+    repoDiv.innerHTML =
+      "<ul>" +
+      files
+        .map(
+          (f) =>
+            `<li onclick="document.getElementById('fileNameInput').value='${f.name}'">${
+              f.type === "dir" ? "📁" : "📄"
+            } ${f.name}</li>`
+        )
+        .join("") +
+      "</ul>";
+  }
+
+  // === REPO MENU ===
   repoSelect.addEventListener("change", async () => {
     const val = repoSelect.value;
     if (!val) return;
@@ -88,15 +104,14 @@ document.addEventListener("DOMContentLoaded", () => {
           auto_init: true,
           private: false,
         });
-        log(`✅ Repo ${name} berhasil dibuat.`, "success");
+        log(`✅ Repo ${name} dibuat.`, "success");
         loadRepos();
       } catch (e) {
         log("❌ Error buat repo: " + e.message, "error");
       }
     } else if (val === "renameRepo") {
-      if (!currentRepo)
-        return log("⚠️ Pilih repo dulu dari daftar!", "error");
-      const newName = prompt("Nama baru untuk repo:");
+      if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
+      const newName = prompt("Nama baru repo:");
       if (!newName) return;
       try {
         const [owner, repo] = currentRepo.split("/");
@@ -106,18 +121,17 @@ document.addEventListener("DOMContentLoaded", () => {
           { name: newName }
         );
         currentRepo = updated.full_name;
-        log(`✅ Repo berhasil di-rename menjadi ${newName}`, "success");
+        log(`✅ Repo di-rename jadi ${newName}`, "success");
         loadRepos();
       } catch (e) {
         log("❌ Error rename repo: " + e.message, "error");
       }
     } else if (val === "deleteRepo") {
-      if (!currentRepo)
-        return log("⚠️ Pilih repo dulu dari daftar!", "error");
-      if (!confirm(`Yakin hapus repo ${currentRepo}?`)) return;
+      if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
+      if (!confirm(`Hapus repo ${currentRepo}?`)) return;
       try {
         await apiRequest(`https://api.github.com/repos/${currentRepo}`, "DELETE");
-        log(`✅ Repo ${currentRepo} berhasil dihapus.`, "success");
+        log(`✅ Repo ${currentRepo} dihapus.`, "success");
         currentRepo = "";
         loadRepos();
       } catch (e) {
@@ -133,83 +147,137 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         renderRepoContent(files);
       } catch (e) {
-        log("❌ Error load repo: " + e.message, "error");
+        log("❌ Error load isi repo: " + e.message, "error");
       }
     }
   });
 
-  function renderRepoContent(files) {
-    const repoDiv = document.getElementById("fileList");
-    repoDiv.innerHTML =
-      "<ul>" +
-      files
-        .map(
-          (f) =>
-            `<li onclick="fileNameInput.value='${f.name}'">${
-              f.type === "dir" ? "📁" : "📄"
-            } ${f.name}</li>`
-        )
-        .join("") +
-      "</ul>";
+  // === FILE/FOLDER ACTIONS ===
+  async function createFile() {
+    const name = fileNameInput.value.trim();
+    if (!name) return log("⚠️ Isi nama file!", "error");
+    try {
+      await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${name}`,
+        "PUT",
+        {
+          message: "create file",
+          content: btoa(fileContentInput.value || ""),
+        }
+      );
+      log(`✅ File ${name} dibuat.`, "success");
+    } catch (e) {
+      log("❌ Error create file: " + e.message, "error");
+    }
   }
 
-  // ===== FILE ACTIONS (sama kayak versi lo sebelumnya, gw biarin tetap) =====
-  async function createFile() { /* ... */ }
-  async function editFile() { /* ... */ }
-  async function deleteFile() { /* ... */ }
-  async function createFolder() { /* ... */ }
-  async function uploadFile() { /* ... */ }
-  async function renameItem() { /* ... */ }
+  async function editFile() {
+    const name = fileNameInput.value.trim();
+    if (!name) return log("⚠️ Pilih file!", "error");
+    try {
+      const shaData = await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${name}`
+      );
+      await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${name}`,
+        "PUT",
+        {
+          message: "update file",
+          content: btoa(fileContentInput.value),
+          sha: shaData.sha,
+        }
+      );
+      log(`✅ File ${name} diupdate.`, "success");
+    } catch (e) {
+      log("❌ Error edit file: " + e.message, "error");
+    }
+  }
 
-  // ===== ACTION DROPDOWN =====
+  async function deleteFile() {
+    const name = fileNameInput.value.trim();
+    if (!name) return log("⚠️ Pilih file!", "error");
+    if (!confirm(`Hapus ${name}?`)) return;
+    try {
+      const shaData = await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${name}`
+      );
+      await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${name}`,
+        "DELETE",
+        { message: "delete file", sha: shaData.sha }
+      );
+      log(`✅ ${name} dihapus.`, "success");
+    } catch (e) {
+      log("❌ Error delete: " + e.message, "error");
+    }
+  }
+
+  async function createFolder() {
+    const name = fileNameInput.value.trim();
+    if (!name) return log("⚠️ Isi nama folder!", "error");
+    try {
+      await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${name}/.gitkeep`,
+        "PUT",
+        { message: "create folder", content: btoa("") }
+      );
+      log(`✅ Folder ${name} dibuat.`, "success");
+    } catch (e) {
+      log("❌ Error create folder: " + e.message, "error");
+    }
+  }
+
+  async function renameItem() {
+    const oldName = fileNameInput.value.trim();
+    const newName = newNameInput.value.trim();
+    if (!oldName || !newName) return log("⚠️ Isi nama!", "error");
+    try {
+      const shaData = await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${oldName}`
+      );
+      await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${oldName}`,
+        "DELETE",
+        { message: "rename file", sha: shaData.sha }
+      );
+      await apiRequest(
+        `https://api.github.com/repos/${currentRepo}/contents/${newName}`,
+        "PUT",
+        {
+          message: "create renamed file",
+          content: btoa(atob(shaData.content || "")),
+        }
+      );
+      log(`✅ ${oldName} di-rename jadi ${newName}`, "success");
+      renamePopup.style.display = "none";
+    } catch (e) {
+      log("❌ Error rename: " + e.message, "error");
+    }
+  }
+
+  // === ACTION MENU ===
   window.runAction = function () {
     const action = document.getElementById("actionMenu").value;
     switch (action) {
       case "create": createFile(); break;
       case "edit": editFile(); break;
       case "delete": deleteFile(); break;
-      case "uploadFileBtn": uploadFile(); break;
+      case "uploadFileBtn": document.getElementById("uploadFile").click(); break;
       case "createFolder": createFolder(); break;
       case "rename":
-        if (!fileNameInput.value.trim()) {
-          log("⚠️ Pilih file/folder dulu!", "error");
-          return;
-        }
+        if (!fileNameInput.value.trim())
+          return log("⚠️ Pilih file/folder dulu!", "error");
         newNameInput.value = fileNameInput.value.trim();
         renamePopup.style.display = "flex";
         break;
-      case "delletRepo": deleteRepo(); break;
-      default: alert("⚠️ Pilih aksi dulu!");
+      default:
+        alert("⚠️ Pilih aksi dulu!");
     }
   };
 
-  // ===== COPY & FULLSCREEN =====
-  window.copyCode = function () {
-    fileContentInput.select();
-    document.execCommand("copy");
-    alert("✅ Isi berhasil disalin!");
-  };
-  window.toggleFullscreen = function () {
-    document.getElementById("codeBox").classList.toggle("fullscreen");
-  };
-
-  // ===== DARK/LIGHT MODE =====
-  const toggleBtn = document.getElementById("modeToggle");
-  toggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("light");
-    document.body.classList.toggle("dark");
-    toggleBtn.textContent = document.body.classList.contains("dark")
-      ? "🌞 Mode"
-      : "🌙 Mode";
+  // === POPUP EVENTS ===
+  document.getElementById("renameConfirmBtn").addEventListener("click", renameItem);
+  document.getElementById("renameCancelBtn").addEventListener("click", () => {
+    renamePopup.style.display = "none";
   });
-
-  // ===== POPUP RENAME =====
-  document
-    .getElementById("renameConfirmBtn")
-    .addEventListener("click", renameItem);
-  document
-    .getElementById("renameCancelBtn")
-    .addEventListener("click", () => {
-      renamePopup.style.display = "none";
-    });
 });
