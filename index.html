@@ -6,122 +6,63 @@
 <link rel="manifest" href="/manifest.json" />
 <link rel="stylesheet" href="style.css"/>
 <style>
+<title>GitHub Manager ☀️</title>
+<style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; }
 .container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 header h1 { font-size:1.8rem; }
 header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; }
+
 .terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; }
 body.light .terminal { background:#eee; color:#000; }
+
 .form-row { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
-input[type=text], select, button { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; }
-body.light input, body.light select { border:1px solid #aaa; }
-#fileNameInput { width:100%; font-size:1rem; padding:10px; }
-#repoContent { margin:5px 0; padding:10px; border:1px solid #444; border-radius:6px; }
-#repoContent ul { list-style:none; padding-left:10px; margin-top:5px; }
-#repoContent li { padding:4px 0; font-size:1rem; }
+input[type=text], select, button, textarea { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; }
+body.light input, body.light select, body.light textarea { border:1px solid #aaa; }
+
+select { text-align: center; }
+select option { text-align: center; }
+
 .code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:40px; }
 .code-box textarea { width:100%; min-height:220px; background:transparent; color:#dcdcdc; border:none; outline:none; padding:12px; resize:vertical; font-family:monospace; font-size:1rem; line-height:1.5; }
 .code-actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
 .code-actions button { background:#333; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:14px; }
 .code-actions button:hover { background:#555; }
-.fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: #1e1e1e; border:none; border-radius:0; padding:0; display:flex; flex-direction:column; }
-.fullscreen textarea { flex: 1; width:100%; height:100%; padding:15px; font-size:1.2rem; resize:none; background:transparent; color:#dcdcdc; border:none; outline:none; line-height:1.5; }
-.fullscreen .code-actions { position:absolute; top:10px; right:10px; z-index:10000; }
-#fileActions { display:flex; gap:5px; margin-top:10px; flex-wrap:wrap; }
-#fileActions button { flex:1; text-align:center; padding:10px; font-size:1rem; cursor:pointer; }
+
+.fullscreen { position: fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:#1e1e1e; border:none; border-radius:0; padding:0; display:flex; flex-direction:column; }
+.fullscreen textarea { flex:1; width:100%; height:100%; padding:15px; font-size:1.2rem; resize:none; background:transparent; color:#dcdcdc; border:none; outline:none; line-height:1.5; }
+
 body.dark { background:#000; color:limegreen; }
 body.dark input, body.dark select, body.dark textarea, body.dark button { background:#000; color:limegreen; border-color:limegreen; }
 body.dark button:hover { background:limegreen; color:black; }
+
 body.light { background:#fff; color:#000; }
-body.light input, body.light select, body.light textarea { background:#fff; color:#000; }
-body.light button { background:#3399ff; color:#fff; border-color:#3399ff; }
+body.light input, body.light select, body.light textarea, body.light button { background:#fff; color:#000; border-color:#3399ff; }
 body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; }
-.terminal::-webkit-scrollbar, textarea::-webkit-scrollbar { width:8px; height:8px; }
-.terminal::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb { background:#666; border-radius:4px; }
-.terminal::-webkit-scrollbar-thumb:hover, textarea::-webkit-scrollbar-thumb:hover { background:#888; }
+
+#renamePopup { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; }
+#renamePopupContent { background:#1e1e1e; padding:20px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
+body.light #renamePopupContent { background:#fff; color:#000; }
+#renamePopupContent input { width:100%; padding:10px; border-radius:6px; border:1px solid #444; margin-bottom:15px; font-size:1rem; background:#111; color:#0f0; }
+body.light #renamePopupContent input { background:#fff; color:#000; border:1px solid #aaa; }
+#renamePopupContent button { flex:1; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-size:1rem; }
+#renameConfirmBtn { background:#2ca02c; color:#fff; }
+#renameCancelBtn { background:#d9534f; color:#fff; }
+
 @media screen and (max-width:600px){
   .form-row { flex-direction:column; }
   .code-box textarea { min-height:160px; font-size:1rem; }
   header h1 { font-size:1.4rem; }
   header button { font-size:0.9rem; padding:5px 10px; }
 }
-option { text-align:center; }
-
-/* === Popup Rename === */
-#renamePopup {
-  display: none; /* default sembunyi */
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-}
-
-#renamePopupContent {
-  background: #1e1e1e;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  text-align: center;
-}
-
-#renamePopupContent p {
-  margin-bottom: 10px;
-  font-size: 1.2rem;
-}
-
-#renamePopupContent input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #444;
-  margin-bottom: 15px;
-  font-size: 1rem;
-  background: #111;
-  color: #0f0;
-}
-
-body.light #renamePopupContent {
-  background: #fff;
-  color: #000;
-}
-
-body.light #renamePopupContent input {
-  background: #fff;
-  color: #000;
-  border: 1px solid #aaa;
-}
-
-#renamePopupContent button {
-  flex: 1;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-#renameConfirmBtn {
-  background: #2ca02c;
-  color: #fff;
-}
-
-#renameCancelBtn {
-  background: #d9534f;
-  color: #fff;
-}
 </style>
-<title>GitHub File Manager</title>
 </head>
 <body class="dark">
 <div class="container">
   <header>
-    <h1>GitHub File Manager</h1>
+    <h1>GitHub Manager</h1>
     <button id="modeToggle">☀️ Mode</button>
   </header>
 
@@ -129,68 +70,66 @@ body.light #renamePopupContent input {
 
   <!-- Token -->
   <div class="form-row">
-    <input type="text" id="tokenInput" placeholder="Token ghp_xxx"/>
+    <input type="text" id="tokenInput" placeholder="Masukkan token ghp_xxx"/>
     <button id="saveTokenBtn">Set Token</button>
   </div>
 
   <!-- Repo -->
-<div class="form-row">
-  <label for="repoSelect"></label>
-  <select id="repoSelect">
-    <option value="">-- Aksi Repo --</option>
-  </select>
-  <button id="loadRepoBtn">Load Repo</button>
-</div>
-
-<!-- Aksi Repo -->
-<select id="actionMenu">
-  <option value="">-- Menu --</option>
-  <!-- Repo actions -->
-  <option value="createRepo">📦 Buat Repo</option>
-  <option value="renameRepo">📝 Rename Repo</option>
-  <option value="deleteRepo">🗑️ Hapus Repo</option>
-  <!-- File/Folder actions -->
-  <option value="create">➕ Buat File</option>
-  <option value="edit">✏️ Edit File</option>
-  <option value="delete">🗑️ Hapus File</option>
-  <option value="createFolder">📂 Buat Folder</option>
-  <option value="rename">📝 Rename File/Folder</option>
-</select>
-<button onclick="runAction()">Jalankan</button>
-</div>
-
-
-  <!-- File Area -->
-  <div id="repoContent">
-    <input type="text" id="fileNameInput" placeholder="Nama file/folder"/>
-    <div class="code-box" id="codeBox">
-      <div class="code-actions">
-        <button onclick="copyCode()">📋</button>
-        <button onclick="toggleFullscreen()">🔲</button>
-      </div>
-      <textarea id="fileContentInput" placeholder="Isi file (jika file)"></textarea>
-    </div>
-    <div id="fileList"></div>
+  <div class="form-row">
+    <select id="repoSelect">
+      <option value="">-- Pilih Repo --</option>
+    </select>
+    <button id="loadRepoBtn">Load Repo</button>
   </div>
 
-  <!-- Action Dropdown -->
+  <!-- Aksi Repo & File -->
   <div class="form-row">
     <select id="actionMenu">
-      <option value="">-- Menu --</option>
-      <option value="create">➕ Buat File</option>
-      <option value="edit">✏️ Edit File</option>
-      <option value="delete">🗑️ Hapus File</option>
+      <option value="" disabled selected class="placeholder">-- Menu --</option>
+      <option value="createRepo">📦 Buat Repo</option>
+      <option value="renameRepo">📝 Rename Repo</option>
+      <option value="deleteRepo">🗑️ Hapus Repo</option>
+      <option value="createFile">➕ Buat File</option>
+      <option value="editFile">✏️ Edit File</option>
+      <option value="deleteFile">🗑️ Hapus File</option>
       <option value="createFolder">📂 Buat Folder</option>
-      <option value="uploadFileBtn">📂 Upload File</option>
-      <option value="rename">📝 Rename File/Folder</option>
+      <option value="renameItem">📝 Rename File/Folder</option>
+      <option value="uploadFile">📂 Upload File</option>
+      <option value="downloadFile">📂 Download File</option>
     </select>
-    <button onclick="runAction()">Jalankan</button>
+    <input type="text" id="fileNameInput" placeholder="Nama file/folder/repo"/>
+    <button id="runActionBtn">Jalankan</button>
+  </div>
+
+  <!-- Editor -->
+  <div class="code-box" id="codeBox">
+    <div class="code-actions">
+      <button id="copyBtn">📋</button>
+      <button id="fullscreenBtn">🔲</button>
+    </div>
+    <textarea id="fileContentInput" placeholder="Isi file..."></textarea>
+  </div>
+
+  <!-- File List -->
+  <div id="repoContent">
+    <ul id="fileList"></ul>
+  </div>
+</div>
+
+<!-- Popup Rename -->
+<div id="renamePopup">
+  <div id="renamePopupContent">
+    <p>Masukkan nama baru:</p>
+    <input type="text" id="newNameInput"/>
+    <div class="form-row">
+      <button id="renameConfirmBtn">✅ Rename</button>
+      <button id="renameCancelBtn">❌ Batal</button>
+    </div>
   </div>
 </div>
 
 
 <script src="script.js">
-</script>
-<script src="final.js"></script>
+
 </body>
 </html>
