@@ -228,27 +228,45 @@ document.getElementById("renameCancelBtn").onclick = () => {
 
 // === ACTION MENU ===
 function runAction() {
-  const action = document.getElementById("actionMenu").value;
-  const path = fileNameInput.value.trim();
-  const content = fileContentInput.value;
-  switch (action) {
-    case "create": createFile(path, content); break;
-    case "edit": if (path) editFile(path); break;
-    case "delete": if (path) deleteFile(path); break;
-    case "rename": if (path) openRenamePopup(path); break;
-    default: log("⚠️ Pilih aksi dulu", "info");
-  }
-}
-window.runAction = runAction;
+  const menu = document.getElementById("actionMenu");
+  const action = menu.value;
 
-// === COPY / FULLSCREEN ===
-window.copyCode = () => {
-  navigator.clipboard.writeText(fileContentInput.value);
-  log("📋 Teks disalin", "success");
-};
-window.toggleFullscreen = () => {
-  document.getElementById("codeBox").classList.toggle("fullscreen");
-};
+  switch (action) {
+    // === Repo Actions ===
+    case "createRepo":
+      createRepo();
+      break;
+    case "renameRepo":
+      renameRepo();
+      break;
+    case "deleteRepo":
+      deleteRepo();
+      break;
+
+    // === File/Folder Actions ===
+    case "create":
+      createFile();
+      break;
+    case "edit":
+      editFile();
+      break;
+    case "delete":
+      deleteFile();
+      break;
+    case "createFolder":
+      createFolder();
+      break;
+    case "rename":
+      renameItem();
+      break;
+
+    default:
+      showMessage("⚠️ Pilih aksi yang valid.");
+  }
+
+  // reset dropdown
+  menu.value = "";
+}
 
 // === INIT ===
 if (token) {
