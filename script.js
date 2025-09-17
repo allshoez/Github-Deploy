@@ -71,42 +71,57 @@ document.addEventListener("DOMContentLoaded", () => {
     ).join("") + "</ul>";
   }
 
+
   // ===== CRUD REPO =====
-  async function createRepo() {
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Masukkan nama repo baru!", "error");
-    try {
-      const res = await apiRequest("https://api.github.com/user/repos", "POST", { name });
-      if (res.id) { log(`✅ Repo ${name} berhasil dibuat!`, "success"); fileNameInput.value = ""; loadRepos(); }
-      else log("❌ Gagal buat repo", "error");
-    } catch (e) { log("❌ Error buat repo: " + e.message, "error"); }
-  }
+async function createRepo(){
+  const name = fileNameInput.value.trim();
+  if(!name) return log("⚠️ Masukkan nama repo baru!","error");
+  try{
+    const res = await apiRequest("https://api.github.com/user/repos", "POST", { name });
+    if(res.id){ 
+      log(`✅ Repo ${name} berhasil dibuat!`, "success"); 
+      fileNameInput.value = ""; 
+      loadRepos(); 
+    } else log("❌ Gagal buat repo", "error");
+  }catch(e){ log("❌ Error buat repo: "+e.message, "error"); }
+}
 
-  async function renameRepo() {
-    const oldName = fileNameInput.value.trim();
-    const newName = newNameInput.value.trim();
-    if (!oldName || !newName) return log("⚠️ Masukkan nama lama & baru", "error");
-    try {
-      await apiRequest(`https://api.github.com/repos/${oldName}`, "PATCH", { name: newName });
-      log(`✅ Repo ${oldName} berhasil di rename menjadi ${newName}`, "success");
-      fileNameInput.value = newName;
-      newNameInput.value = "";
-      loadRepos();
-    } catch (e) { log("❌ Error rename repo: " + e.message, "error"); }
-  }
+async function renameRepo(){
+  const oldName = fileNameInput.value.trim();
+  const newName = newNameInput.value.trim();
+  if(!oldName || !newName) return log("⚠️ Masukkan nama lama & baru","error");
+  try{
+    const resUser = await apiRequest("https://api.github.com/user");
+    const username = resUser.login;
+    await apiRequest(`https://api.github.com/repos/${username}/${oldName}`, "PATCH", { name: newName });
+    log(`✅ Repo ${oldName} berhasil di rename menjadi ${newName}`, "success");
+    fileNameInput.value = newName;
+    newNameInput.value = "";
+    loadRepos();
+  }catch(e){ log("❌ Error rename repo: "+e.message, "error"); }
+}
 
-  async function deleteRepo() {
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Masukkan nama repo yang mau dihapus", "error");
-    if (!deleteConfirm) { deleteConfirm = true; log("⚠️ Tekan tombol Hapus Repo lagi untuk konfirmasi", "info"); return; }
-    try {
-      await apiRequest(`https://api.github.com/repos/${name}`, "DELETE");
-      log(`✅ Repo ${name} berhasil dihapus`, "success");
-      fileNameInput.value = "";
-      deleteConfirm = false;
-      loadRepos();
-    } catch (e) { log("❌ Error hapus repo: " + e.message, "error"); deleteConfirm = false; }
+async function deleteRepo(){
+  const name = fileNameInput.value.trim();
+  if(!name) return log("⚠️ Masukkan nama repo yang mau dihapus","error");
+  if(!deleteConfirm){ 
+    deleteConfirm = true; 
+    log("⚠️ Tekan tombol Hapus Repo lagi untuk konfirmasi","info"); 
+    return; 
   }
+  try{
+    const resUser = await apiRequest("https://api.github.com/user");
+    const username = resUser.login;
+    await apiRequest(`https://api.github.com/repos/${username}/${name}`, "DELETE");
+    log(`✅ Repo ${name} berhasil dihapus`, "success");
+    fileNameInput.value = ""; 
+    deleteConfirm = false; 
+    loadRepos();
+  }catch(e){ 
+    log("❌ Error hapus repo: "+e.message,"error"); 
+    deleteConfirm = false; 
+  }
+}
 
   // ===== CRUD FILE/FOLDER =====
   async function createFile() {
