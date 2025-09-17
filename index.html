@@ -16,70 +16,62 @@
   </header>
 
   <div id="output" class="terminal"><p>Selamat datang!</p></div>
-  
-  
-    <!-- Editor -->
-  <div class="code-box" id="codeBox">
-    <div class="code-actions">
-      <button id="copyBtn">📋</button>
-      <button id="fullscreenBtn">🔲</button>
-    </div>
-    <textarea id="fileContentInput" placeholder="Isi file..."></textarea>
-  </div>
 
-  <!-- Token -->
-  <div class="form-row">
-    <input type="text" id="tokenInput" placeholder="Masukkan token ghp_xxx"/>
-    <button id="saveTokenBtn">Set Token</button>
-  </div>
-
-
- <!-- File List -->
-  <div id="repoContent">
-    <ul id="fileList"></ul>
-  </div>
+<div class="form-row">
+<input type="text" id="tokenInput" placeholder="Masukkan token ghp_xxx"/>
+<button id="saveTokenBtn">Set Token</button>
 </div>
-  <!-- Repo -->
-  <div class="form-row">
-    <select id="repoSelect">
-      <option value="">-- Pilih Repo --</option>
-    </select>
-    <button id="loadRepoBtn">Load Repo</button>
-  </div>
 
-  <!-- Aksi Repo & File -->
-  <div class="form-row">
-    <select id="actionMenu">
-      <option value="" disabled selected class="placeholder">-- Menu --</option>
-      <option value="createRepo">📦 Buat Repo</option>
-      <option value="renameRepo">📝 Rename Repo</option>
-      <option value="deleteRepo">🗑️ Hapus Repo</option>
-      <option value="createFile">➕ Buat File</option>
-      <option value="editFile">✏️ Edit File</option>
-      <option value="deleteFile">🗑️ Hapus File</option>
-      <option value="createFolder">📂 Buat Folder</option>
-      <option value="renameItem">📝 Rename File/Folder</option>
-      <option value="uploadFile">📂 Upload File</option>
-      <option value="downloadFile">📂 Download File</option>
-    </select>
-    <input type="text" id="fileNameInput" placeholder="Nama file/folder/repo"/>
-    <button id="runActionBtn">Jalankan</button>
-  </div>
+<div class="form-row">
+<select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
+<button id="loadRepoBtn">Load Repo</button>
+</div>
+<br>
+  
+ <div id="repoContent">
+<ul id="fileList"></ul>
+</div>
+<br>
+
+<div class="form-row">
+<select id="actionMenu">
+<option value="" disabled selected>-- Menu --</option>
+<option value="createRepo">📦 Buat Repo</option>
+<option value="renameRepo">📝 Rename Repo</option>
+<option value="deleteRepo">🗑️ Hapus Repo</option>
+<option value="createFile">➕ Buat File</option>
+<option value="editFile">✏️ Edit File</option>
+<option value="deleteFile">🗑️ Hapus File</option>
+<option value="createFolder">📂 Buat Folder</option>
+<option value="renameItem">📝 Rename File/Folder</option>
+<option value="uploadFile">📂 Upload File</option>
+<option value="downloadFile">📂 Download File</option>
+</select>
+<input type="text" id="fileNameInput" placeholder="Nama file/folder/repo"/>
+<button id="runActionBtn">Jalankan</button>
+</div>
+
+<div class="code-box" id="codeBox">
+<div class="code-actions">
+<button id="copyBtn">📋</button>
+<button id="fullscreenBtn">🔲</button>
+</div>
+<textarea id="fileContentInput" placeholder="Isi file..."></textarea>
+</div>
 
 
-<!-- Popup Rename -->
+
 <div id="renamePopup">
-  <div id="renamePopupContent">
-    <p>Masukkan nama baru:</p>
-    <input type="text" id="newNameInput"/>
-    <div class="form-row">
-      <button id="renameConfirmBtn">✅ Rename</button>
-      <button id="renameCancelBtn">❌ Batal</button>
-    </div>
-  </div>
+<div id="renamePopupContent">
+<p>Masukkan nama baru:</p>
+<input type="text" id="newNameInput"/>
+<div class="form-row">
+<button id="renameConfirmBtn">✅ Rename</button>
+<button id="renameCancelBtn">❌ Batal</button>
+</div>
+</div>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
