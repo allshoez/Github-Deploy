@@ -123,6 +123,51 @@ async function deleteRepo(){
   }
 }
 
+// ===== DELETE REPO =====
+
+async function deleteRepo() {
+  const name = fileNameInput.value.trim();
+  if (!name) return log("⚠️ Masukkan nama repo yang mau dihapus", "error");
+
+  // Konfirmasi dua langkah
+  if (!deleteConfirm) {
+    deleteConfirm = true;
+    log("⚠️ Tekan tombol Hapus Repo lagi untuk konfirmasi", "info");
+    return;
+  }
+
+  try {
+    // Ambil username dari token
+    const userData = await apiRequest("https://api.github.com/user");
+    if (!userData.login) throw new Error("Gagal ambil username dari token");
+    const username = userData.login;
+
+    // Hapus repo
+    const res = await fetch(`https://api.github.com/repos/${username}/${name}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json"
+      }
+    });
+
+    if (res.status === 204) {
+      log(`✅ Repo ${name} berhasil dihapus`, "success");
+      fileNameInput.value = "";
+      deleteConfirm = false;
+      loadRepos();
+    } else {
+      const errData = await res.json();
+      throw new Error(errData.message || "Gagal hapus repo");
+    }
+
+  } catch (e) {
+    log("❌ Error hapus repo: " + e.message, "error");
+    deleteConfirm = false;
+  }
+}
+
+
   // ===== CRUD FILE/FOLDER =====
   async function createFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
