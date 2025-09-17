@@ -143,15 +143,20 @@ body.light #renamePopupContent input {
 </div>
 
 <!-- Aksi Repo -->
-<div class="form-row">
-  <label for="repoAction"></label>
-  <select id="repoAction">
-    <option value="">-- Menu Repo --</option>
-    <option value="createRepo">➕ Buat Repo</option>
-    <option value="renameRepo">✏️ Rename Repo</option>
-    <option value="deleteRepo">🗑️ Hapus Repo</option>
-  </select>
-  <button id="runRepoAction">Jalankan</button>
+<select id="actionMenu">
+  <option value="">-- Menu --</option>
+  <!-- Repo actions -->
+  <option value="createRepo">📦 Buat Repo</option>
+  <option value="renameRepo">📝 Rename Repo</option>
+  <option value="deleteRepo">🗑️ Hapus Repo</option>
+  <!-- File/Folder actions -->
+  <option value="create">➕ Buat File</option>
+  <option value="edit">✏️ Edit File</option>
+  <option value="delete">🗑️ Hapus File</option>
+  <option value="createFolder">📂 Buat Folder</option>
+  <option value="rename">📝 Rename File/Folder</option>
+</select>
+<button onclick="runAction()">Jalankan</button>
 </div>
 
 
