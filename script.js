@@ -163,44 +163,81 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { log("❌ Error buat folder: " + e.message, "error"); }
   }
 
-  async function uploadFile() {
-    if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    const fileInput = document.createElement("input");
-    fileInput.type = "file"; fileInput.accept = "*/*";
-    fileInput.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const content = reader.result.split(",")[1];
-        try {
-          await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${file.name}`, "PUT", { message: `Upload file ${file.name}`, content });
-          log(`✅ File ${file.name} berhasil diupload.`, "success");
-          document.getElementById("loadRepoBtn").click();
-        } catch (err) { log("❌ Error upload file: " + err.message, "error"); }
-      };
-      reader.readAsDataURL(file);
-    };
-    fileInput.click();
-  }
+// ===== UPLOAD FILE =====
+async function uploadFile(){
+  if(!currentRepo) return log("⚠️ Pilih repo dulu!","error");
+  
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "*/*";
+  
+  fileInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
 
-  async function downloadFile() {
-    if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
-    const name = fileNameInput.value.trim();
-    if (!name) return log("⚠️ Pilih file yang mau di-download", "error");
-    try {
-      const fileData = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);
-      const content = atob(fileData.content.replace(/\n/g, ""));
-      const blob = new Blob([content], { type: "text/plain" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      log(`✅ File ${name} berhasil didownload`, "success");
-    } catch (e) { log("❌ Error download file: " + e.message, "error"); }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const content = reader.result.split(",")[1];
+      try {
+        await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${file.name}`, "PUT", {
+          message: `Upload file ${file.name}`,
+          content: content
+        });
+        log(`✅ File ${file.name} berhasil diupload.`, "success");
+        showNotification("Sukses Upload Berkas ✔️"); // <-- Notifikasi
+        document.getElementById("loadRepoBtn").click();
+      } catch(err) {
+        log("❌ Error upload file: "+err.message, "error");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  fileInput.click();
+}
+
+// ===== DOWNLOAD FILE =====
+async function downloadFile(){
+  if(!currentRepo) return log("⚠️ Pilih repo dulu!","error");
+  
+  const name = fileNameInput.value.trim();
+  if(!name) return log("⚠️ Pilih file yang mau di-download", "error");
+  
+  try {
+    const fileData = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${name}`);
+    const content = atob(fileData.content.replace(/\n/g, ""));
+    const blob = new Blob([content], { type: "text/plain" });
+    
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    log(`✅ File ${name} berhasil didownload`, "success");
+    showNotification("Sukses Download Berkas ✔️"); // <-- Notifikasi
+  } catch(e) {
+    log("❌ Error download file: "+e.message, "error");
   }
+}
+
+// ===== Fungsi Notifikasi =====
+function showNotification(msg) {
+  const notif = document.createElement("div");
+  notif.className = "popup-notif";
+  notif.textContent = msg;
+  document.body.appendChild(notif);
+
+  // Slide in
+  setTimeout(() => notif.classList.add("show"), 10);
+
+  // Slide out dan hapus
+  setTimeout(() => {
+    notif.classList.remove("show");
+    setTimeout(() => document.body.removeChild(notif), 500);
+  }, 2500); // tampil 2,5 detik
+}
 
   // ===== ACTION DROPDOWN =====
   document.getElementById("runActionBtn").addEventListener("click", () => {
