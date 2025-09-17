@@ -292,30 +292,38 @@ async function deleteRepo() {
   }
 
   // ===== ACTION DROPDOWN =====
-  document.getElementById("runActionBtn").addEventListener("click", () => {
-    const action = document.getElementById("actionMenu").value;
-    switch (action) {
-      case "createRepo": createRepo(); break;
-      case "renameRepo":
-        if (!fileNameInput.value.trim()) { log("⚠️ Masukkan nama repo lama", "error"); return; }
-        newNameInput.value = fileNameInput.value.trim();
-        renamePopup.style.display = "flex";
-        break;
-      case "deleteRepo": deleteRepo(); break;
-      case "createFile": createFile(); break;
-      case "editFile": editFile(); break;
-      case "deleteFile": deleteFile(); break;
-      case "createFolder": createFolder(); break;
-      case "renameItem":
-        if (!fileNameInput.value.trim()) { log("⚠️ Pilih file/folder dulu!", "error"); return; }
-        newNameInput.value = fileNameInput.value.trim();
-        renamePopup.style.display = "flex";
-        break;
-      case "uploadFile": uploadFile(); break;
-      case "downloadFile": downloadFile(); break;
-      default: alert("⚠️ Pilih aksi dulu!");
-    }
-  });
+  // ===== ACTION DROPDOWN =====
+document.getElementById("runActionBtn").addEventListener("click",()=>{
+  const action = document.getElementById("actionMenu").value;
+
+  switch(action){
+    // REPO
+    case "createRepo": createRepo(); break;
+    case "renameRepo": 
+      if(!fileNameInput.value.trim()){log("⚠️ Masukkan nama repo lama","error"); return;}
+      newNameInput.value = fileNameInput.value.trim();
+      renamePopup.style.display = "flex";
+      break;
+    case "deleteRepo": deleteRepo(); break;
+
+    // FILE/FOLDER
+    case "createFile": createFile(); break;
+    case "editFile": editFile(); break;
+    case "deleteFile": deleteFile(); break;
+    case "createFolder": createFolder(); break;
+    case "renameItem": 
+      if(!fileNameInput.value.trim()){log("⚠️ Pilih file/folder dulu!","error"); return;}
+      newNameInput.value = fileNameInput.value.trim();
+      renamePopup.style.display = "flex";
+      break;
+
+    // UPLOAD/DOWNLOAD
+    case "uploadFile": uploadFile(); break;
+    case "downloadFile": downloadFile(); break;
+
+    default: alert("⚠️ Pilih Menu dan aksi dulu!");
+  }
+});
 
   // ===== COPY & FULLSCREEN =====
   document.getElementById("copyBtn").addEventListener("click", () => {
