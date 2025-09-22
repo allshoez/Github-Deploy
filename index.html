@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GitHub Manager ☀️</title>
 <style>
+/* ===== STYLING ===== */
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; }
+body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:22px; }
 .container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-header h1 { font-size:1.8rem; }
-header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; }
+header h1 { font-size:1.10rem; }
+header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:3rem; }
 
 .terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; }
 body.light .terminal { background:#eee; color:#000; }
@@ -73,12 +74,10 @@ header button { font-size:0.9rem; padding:5px 10px; }
 <select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
 <button id="loadRepoBtn">Load Repo</button>
 </div>
-<br>
-  
- <div id="repoContent">
+
+<div id="repoContent">
 <ul id="fileList"></ul>
 </div>
-<br>
 
 <div class="form-row">
 <select id="actionMenu">
@@ -107,8 +106,6 @@ header button { font-size:0.9rem; padding:5px 10px; }
 <textarea id="fileContentInput" placeholder="Isi file..."></textarea>
 </div>
 
-
-
 <div id="renamePopup">
 <div id="renamePopupContent">
 <p>Masukkan nama baru:</p>
@@ -119,22 +116,9 @@ header button { font-size:0.9rem; padding:5px 10px; }
 </div>
 </div>
 </div>
-<script>
-    // ========== Toggle Dark/Light Mode ==========
-  const toggleBtn = document.getElementById("modeToggle");
-  const body = document.body;
-  toggleBtn.addEventListener("click", () => {
-    if (body.classList.contains("dark")) {
-      body.classList.remove("dark");
-      body.classList.add("light");
-      toggleBtn.textContent = "🌙 Dark Mode";
-    } else {
-      body.classList.remove("light");
-      body.classList.add("dark");
-      toggleBtn.textContent = "☀️ Light Mode";
-    }
-  });
-</script>
+
+<!-- Script utama -->
 <script src="script.js"></script>
+
 </body>
 </html>
