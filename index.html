@@ -3,41 +3,47 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GitHub Manager ☀️</title>
+<title>GitHub Mandiri v2 ☀️</title>
 <style>
-/* ===== STYLING ===== */
+:root {
+  --bg-dark: #000; --text-dark: #0f0; --border-dark: #0f0;
+  --bg-light: #fff; --text-light: #000; --border-light: #3399ff;
+}
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:22px; }
+body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; transition: all 0.2s; }
+body.dark { background:var(--bg-dark); color:var(--text-dark); }
+body.light { background:var(--bg-light); color:var(--text-light); }
+
 .container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-header h1 { font-size:1.10rem; }
-header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:3rem; }
+header h1 { font-size:1.8rem; }
+header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; transition:0.2s; }
+header button:hover { opacity:0.8; }
 
 .terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; }
 body.light .terminal { background:#eee; color:#000; }
 
+.terminal p span.success { color:#0f0; }
+.terminal p span.error { color:#f33; }
+.terminal p span.info { color:#0af; }
+
 .form-row { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
-input[type=text], select, button, textarea { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; }
-body.light input, body.light select, body.light textarea { border:1px solid #aaa; }
+input[type=text], select, button, textarea { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; transition:0.2s; }
+body.light input, body.light select, body.light textarea, body.light button { border:1px solid var(--border-light); background:var(--bg-light); color:var(--text-light); }
+body.dark input, body.dark select, body.dark textarea, body.dark button { border:1px solid var(--border-dark); background:var(--bg-dark); color:var(--text-dark); }
+button:hover { opacity:0.85; }
+
 select { text-align:center; }
 select option { text-align:center; }
 
-.code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:40px; }
+.code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:40px; transition:0.2s; }
 .code-box textarea { width:100%; min-height:220px; background:transparent; color:#dcdcdc; border:none; outline:none; padding:12px; resize:vertical; font-family:monospace; font-size:1rem; line-height:1.5; }
 .code-actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
 .code-actions button { background:#333; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:14px; }
 .code-actions button:hover { background:#555; }
 
-.fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: #1e1e1e; border:none; border-radius:0; padding:0; display:flex; flex-direction:column; }
-.fullscreen textarea { flex: 1; width:100%; height:100%; padding:15px; font-size:1.2rem; resize:none; background:transparent; color:#dcdcdc; border:none; outline:none; line-height:1.5; }
-
-body.dark { background:#000; color:limegreen; }
-body.dark input, body.dark select, body.dark textarea, body.dark button { background:#000; color:limegreen; border-color:limegreen; }
-body.dark button:hover { background:limegreen; color:black; }
-
-body.light { background:#fff; color:#000; }
-body.light input, body.light select, body.light textarea, body.light button { background:#fff; color:#000; border-color:#3399ff; }
-body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; }
+.fullscreen { position: fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background: #1e1e1e; border:none; border-radius:0; padding:0; display:flex; flex-direction:column; }
+.fullscreen textarea { flex:1; width:100%; height:100%; padding:15px; font-size:1.2rem; resize:none; background:transparent; color:#dcdcdc; border:none; outline:none; line-height:1.5; }
 
 #renamePopup { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; }
 #renamePopupContent { background:#1e1e1e; padding:20px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
@@ -48,18 +54,21 @@ body.light #renamePopupContent input { background:#fff; color:#000; border:1px s
 #renameConfirmBtn { background:#2ca02c; color:#fff; }
 #renameCancelBtn { background:#d9534f; color:#fff; }
 
+.popup-notif { position:fixed; top:10px; right:10px; padding:10px 15px; background:#2ca02c; color:#fff; border-radius:6px; opacity:0; transform:translateX(100%); transition:0.4s; z-index:9999; }
+.popup-notif.show { opacity:1; transform:translateX(0); }
+
 @media screen and (max-width:600px){
-.form-row { flex-direction:column; }
-.code-box textarea { min-height:160px; font-size:1rem; }
-header h1 { font-size:1.4rem; }
-header button { font-size:0.9rem; padding:5px 10px; }
+  .form-row { flex-direction:column; gap:6px; }
+  .code-box textarea { min-height:200px; font-size:1rem; }
+  header h1 { font-size:1.4rem; }
+  header button { font-size:0.9rem; padding:5px 10px; }
 }
 </style>
 </head>
 <body class="dark">
 <div class="container">
 <header>
-<h1>GitHub Manager</h1>
+<h1>GitHub Mandiri v2</h1>
 <button id="modeToggle">☀️ Mode</button>
 </header>
 
@@ -117,8 +126,6 @@ header button { font-size:0.9rem; padding:5px 10px; }
 </div>
 </div>
 
-<!-- Script utama -->
 <script src="script.js"></script>
-
 </body>
 </html>
