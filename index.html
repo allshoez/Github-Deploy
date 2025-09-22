@@ -1,32 +1,84 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GitHub Manager ☀️</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: monospace; display:flex; flex-direction:column; min-height:100vh; font-size:16px; transition: background 0.3s, color 0.3s; }
-.container { flex:1; max-width:1000px; margin:auto; padding:10px; display:flex; flex-direction:column; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-header h1 { font-size:1.8rem; }
-header button { padding:6px 12px; border-radius:6px; cursor:pointer; border:none; font-size:1rem; }
 
-.terminal { flex:1; background:#111; color:#0f0; padding:10px; margin-bottom:10px; border-radius:6px; overflow-y:auto; font-size:1rem; line-height:1.5; transition: background 0.3s, color 0.3s; }
+/* Body & general font */
+body { 
+  font-family: monospace; 
+  display:flex; 
+  flex-direction:column; 
+  min-height:100vh; 
+  font-size:22px;  /* naik dari 20px → 22px */
+  line-height:1.6; /* line-height longgar untuk seluruh body */
+  transition: background 0.3s, color 0.3s; 
+}
+
+/* Container full width */
+.container { 
+  flex:1; 
+  width:100%; 
+  max-width:100%; 
+  margin:0; 
+  padding:10px; 
+  display:flex; 
+  flex-direction:column; 
+}
+
+/* Header */
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+header h1 { font-size:2.4rem; } /* naik dari 2.2rem → 2.4rem */
+header button { padding:9px 18px; border-radius:6px; cursor:pointer; border:none; font-size:1.3rem; }
+
+/* Terminal */
+.terminal { 
+  flex:1; 
+  background:#111; 
+  color:#0f0; 
+  padding:14px; 
+  margin-bottom:10px; 
+  border-radius:6px; 
+  overflow-y:auto; 
+  font-size:1.4rem;  /* naik dari 1.25rem → 1.4rem */
+  line-height:1.8;   /* lebih longgar */
+  transition: background 0.3s, color 0.3s; 
+}
 body.light .terminal { background:#eee; color:#000; }
 
+/* Form & input */
 .form-row { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
-input[type=text], select, button, textarea { padding:10px; border-radius:6px; border:1px solid #444; font-family:monospace; font-size:1rem; flex:1; transition: background 0.3s, color 0.3s, border-color 0.3s; }
+input[type=text], select, button, textarea { 
+  padding:16px;            /* naik dari 14px → 16px */
+  border-radius:6px; 
+  border:1px solid #444; 
+  font-family:monospace; 
+  font-size:1.3rem;        /* naik dari 1.2rem → 1.3rem */
+  line-height:1.6;          /* lebih nyaman diketik */
+  flex:1; 
+  transition: background 0.3s, color 0.3s, border-color 0.3s; 
+}
 body.light input, body.light select, body.light textarea { border:1px solid #aaa; }
 select { text-align:center; }
 select option { text-align:center; }
 
-.code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:40px; }
-.code-box textarea { width:100%; min-height:220px; background:transparent; color:#dcdcdc; border:none; outline:none; padding:12px; resize:vertical; font-family:monospace; font-size:1rem; line-height:1.5; }
+/* Code box */
+.code-box { position:relative; border:1px solid #333; border-radius:6px; background:#1e1e1e; margin:10px 0; padding-top:50px; }
+.code-box textarea { 
+  width:100%; 
+  min-height:260px; /* naik dari 240px → 260px */
+  background:transparent; 
+  color:#dcdcdc; 
+  border:none; 
+  outline:none; 
+  padding:16px; 
+  resize:vertical; 
+  font-family:monospace; 
+  font-size:1.3rem;   /* naik dari 1.2rem → 1.3rem */
+  line-height:1.8; 
+}
 .code-actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
-.code-actions button { background:#333; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:14px; }
+.code-actions button { background:#333; color:#fff; border:none; padding:7px 14px; border-radius:4px; cursor:pointer; font-size:18px; }
 .code-actions button:hover { background:#555; }
 
+/* Fullscreen textarea */
 .fullscreen-textarea {
   position: fixed !important;
   top: 0 !important;
@@ -34,14 +86,16 @@ select option { text-align:center; }
   width: 100% !important;
   height: 100% !important;
   z-index: 10000 !important;
-  padding: 15px;
-  border-radius: 0;
-  resize: none;
-  background: #1e1e1e;
-  color: #dcdcdc;
-  font-size: 1rem;
+  padding:20px;
+  border-radius:0;
+  resize:none;
+  background:#1e1e1e;
+  color:#dcdcdc;
+  font-size:1.4rem;
+  line-height:1.8;
 }
 
+/* Dark / Light theme */
 body.dark { background:#000; color:limegreen; }
 body.dark input, body.dark select, body.dark textarea, body.dark button { background:#000; color:limegreen; border-color:limegreen; }
 body.dark button:hover { background:limegreen; color:black; }
@@ -50,156 +104,25 @@ body.light { background:#fff; color:#000; }
 body.light input, body.light select, body.light textarea, body.light button { background:#fff; color:#000; border-color:#3399ff; }
 body.light button:hover { background:#2ca02c; color:#fff; border-color:#2ca02c; }
 
+/* Modals */
 #htmlReviewModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; }
 #htmlReviewModal iframe { flex:1; width:100%; border:none; }
 
 #renamePopup { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; }
-#renamePopupContent { background:#1e1e1e; padding:20px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
+#renamePopupContent { background:#1e1e1e; padding:24px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
 body.light #renamePopupContent { background:#fff; color:#000; }
-#renamePopupContent input { width:100%; padding:10px; border-radius:6px; border:1px solid #444; margin-bottom:15px; font-size:1rem; background:#111; color:#0f0; }
+#renamePopupContent input { width:100%; padding:16px; border-radius:6px; border:1px solid #444; margin-bottom:15px; font-size:1.3rem; background:#111; color:#0f0; line-height:1.6; }
 body.light #renamePopupContent input { background:#fff; color:#000; border:1px solid #aaa; }
-#renamePopupContent button { flex:1; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-size:1rem; }
+#renamePopupContent button { flex:1; padding:12px 16px; border:none; border-radius:6px; cursor:pointer; font-size:1.3rem; }
 #renameConfirmBtn { background:#2ca02c; color:#fff; }
 #renameCancelBtn { background:#d9534f; color:#fff; }
 
+/* Responsive HP */
 @media screen and (max-width:600px){
-.form-row { flex-direction:column; }
-.code-box textarea { min-height:160px; font-size:1rem; }
-header h1 { font-size:1.4rem; }
-header button { font-size:0.9rem; padding:5px 10px; }
+  .form-row { flex-direction:column; }
+  .code-box textarea { min-height:220px; font-size:1.2rem; }
+  header h1 { font-size:2rem; }
+  header button { font-size:1.2rem; padding:8px 14px; }
+  input[type=text], select, button, textarea { font-size:1.2rem; padding:14px; line-height:1.6; }
 }
 </style>
-</head>
-<body class="dark">
-<div class="container">
-<header>
-<h1>GitHub Manager</h1>
-<button id="modeToggle">☀️ Mode</button>
-</header>
-
-<div id="output" class="terminal"><p>Selamat datang!</p></div>
-
-<div class="form-row">
-<input type="text" id="tokenInput" placeholder="Masukkan token ghp_xxx"/>
-<button id="saveTokenBtn">Set Token</button>
-</div>
-
-<div class="form-row">
-<select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
-<button id="loadRepoBtn">Load Repo</button>
-</div>
-<br>
-
-<div id="repoContent">
-<ul id="fileList"></ul>
-</div>
-<br>
-
-<div class="form-row">
-<select id="actionMenu">
-<option value="" disabled selected>-- Menu --</option>
-<option value="createRepo">📦 Buat Repo</option>
-<option value="renameRepo">📝 Rename Repo</option>
-<option value="deleteRepo">🗑️ Hapus Repo</option>
-<option value="createFile">➕ Buat File</option>
-<option value="editFile">✏️ Edit File</option>
-<option value="deleteFile">🗑️ Hapus File</option>
-<option value="createFolder">📂 Buat Folder</option>
-<option value="openFolder">📂 Buka Folder</option>
-<option value="renameItem">📝 Rename File/Folder</option>
-<option value="uploadFile">📂 Upload File</option>
-<option value="downloadFile">📂 Download File</option>
-</select>
-<input type="text" id="fileNameInput" placeholder="Nama file/folder/repo"/>
-<button id="runActionBtn">Jalankan</button>
-</div>
-
-<div class="code-box">
-<div class="code-actions">
-<button id="copyBtn">📋</button>
-<button id="fullscreenBtn">🔲</button>
-<button id="reviewBtn">🔎</button>
-</div>
-<textarea id="fileContentInput" placeholder="Isi file..."></textarea>
-</div>
-
-<!-- Modal Review HTML Fullscreen -->
-<div id="htmlReviewModal">
-<div style="padding:10px; text-align:right;">
-<button id="closeHtmlReview" style="padding:5px 10px; cursor:pointer;">❌ Tutup</button>
-</div>
-<iframe id="htmlPreview"></iframe>
-</div>
-
-<div id="renamePopup">
-<div id="renamePopupContent">
-<p>Masukkan nama baru:</p>
-<input type="text" id="newNameInput"/>
-<div class="form-row">
-<button id="renameConfirmBtn">✅ Rename</button>
-<button id="renameCancelBtn">❌ Batal</button>
-</div>
-</div>
-</div>
-
-<script src="script.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const body = document.body;
-  const toggleBtn = document.getElementById("modeToggle");
-  const textarea = document.getElementById("fileContentInput");
-  const fullscreenBtn = document.getElementById("fullscreenBtn");
-  const reviewBtn = document.getElementById("reviewBtn");
-
-  const htmlReviewModal = document.getElementById("htmlReviewModal");
-  const htmlPreview = document.getElementById("htmlPreview");
-  const closeHtmlReview = document.getElementById("closeHtmlReview");
-
-  
-
-  // Fullscreen textarea
-  let isFullscreen = false;
-  const placeholder = document.createElement('div');
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = "❌ Close";
-  closeBtn.style.position = "fixed";
-  closeBtn.style.top = "10px";
-  closeBtn.style.right = "10px";
-  closeBtn.style.zIndex = "10000";
-  closeBtn.style.padding = "8px 12px";
-  closeBtn.style.cursor = "pointer";
-
-  fullscreenBtn.addEventListener("click", () => {
-    if(!isFullscreen){
-      placeholder.style.height = textarea.offsetHeight + "px";
-      textarea.parentNode.insertBefore(placeholder, textarea);
-      textarea.classList.add("fullscreen-textarea");
-      document.body.appendChild(closeBtn);
-      isFullscreen = true;
-    }
-  });
-
-  closeBtn.addEventListener("click", () => {
-    if(isFullscreen){
-      textarea.classList.remove("fullscreen-textarea");
-      placeholder.parentNode.insertBefore(textarea, placeholder);
-      placeholder.remove();
-      closeBtn.remove();
-      isFullscreen = false;
-    }
-  });
-
-  // Review HTML Modal
-  reviewBtn.addEventListener("click", () => {
-    htmlPreview.srcdoc = textarea.value;
-    htmlReviewModal.style.display = "flex";
-  });
-
-  closeHtmlReview.addEventListener("click", () => {
-    htmlReviewModal.style.display = "none";
-    htmlPreview.srcdoc = "";
-  });
-});
-</script>
-</body>
-</html>
