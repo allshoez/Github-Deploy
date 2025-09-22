@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GitHub Manager ☀️</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -126,3 +132,137 @@ body.light #renamePopupContent input { background:#fff; color:#000; border:1px s
   input[type=text], select, button, textarea { font-size:1.2rem; padding:14px; line-height:1.6; }
 }
 </style>
+</head>
+<body class="dark">
+<div class="container">
+<header>
+<h1>GitHub Manager</h1>
+<button id="modeToggle">☀️ Mode</button>
+</header>
+
+<div id="output" class="terminal"><p>Selamat datang!</p></div>
+
+<div class="form-row">
+<input type="text" id="tokenInput" placeholder="Masukkan token ghp_xxx"/>
+<button id="saveTokenBtn">Set Token</button>
+</div>
+
+<div class="form-row">
+<select id="repoSelect"><option value="">-- Pilih Repo --</option></select>
+<button id="loadRepoBtn">Load Repo</button>
+</div>
+<br>
+
+<div id="repoContent">
+<ul id="fileList"></ul>
+</div>
+<br>
+
+<div class="form-row">
+<select id="actionMenu">
+<option value="" disabled selected>-- Menu --</option>
+<option value="createRepo">📦 Buat Repo</option>
+<option value="renameRepo">📝 Rename Repo</option>
+<option value="deleteRepo">🗑️ Hapus Repo</option>
+<option value="createFile">➕ Buat File</option>
+<option value="editFile">✏️ Edit File</option>
+<option value="deleteFile">🗑️ Hapus File</option>
+<option value="createFolder">📂 Buat Folder</option>
+<option value="openFolder">📂 Buka Folder</option>
+<option value="renameItem">📝 Rename File/Folder</option>
+<option value="uploadFile">📂 Upload File</option>
+<option value="downloadFile">📂 Download File</option>
+</select>
+<input type="text" id="fileNameInput" placeholder="Nama file/folder/repo"/>
+<button id="runActionBtn">Jalankan</button>
+</div>
+
+<div class="code-box">
+<div class="code-actions">
+<button id="copyBtn">📋</button>
+<button id="fullscreenBtn">🔲</button>
+<button id="reviewBtn">🔎</button>
+</div>
+<textarea id="fileContentInput" placeholder="Isi file..."></textarea>
+</div>
+
+<!-- Modal Review HTML Fullscreen -->
+<div id="htmlReviewModal">
+<div style="padding:10px; text-align:right;">
+<button id="closeHtmlReview" style="padding:5px 10px; cursor:pointer;">❌ Tutup</button>
+</div>
+<iframe id="htmlPreview"></iframe>
+</div>
+
+<div id="renamePopup">
+<div id="renamePopupContent">
+<p>Masukkan nama baru:</p>
+<input type="text" id="newNameInput"/>
+<div class="form-row">
+<button id="renameConfirmBtn">✅ Rename</button>
+<button id="renameCancelBtn">❌ Batal</button>
+</div>
+</div>
+</div>
+
+<script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const body = document.body;
+  const toggleBtn = document.getElementById("modeToggle");
+  const textarea = document.getElementById("fileContentInput");
+  const fullscreenBtn = document.getElementById("fullscreenBtn");
+  const reviewBtn = document.getElementById("reviewBtn");
+
+  const htmlReviewModal = document.getElementById("htmlReviewModal");
+  const htmlPreview = document.getElementById("htmlPreview");
+  const closeHtmlReview = document.getElementById("closeHtmlReview");
+
+  
+
+  // Fullscreen textarea
+  let isFullscreen = false;
+  const placeholder = document.createElement('div');
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = "❌ Close";
+  closeBtn.style.position = "fixed";
+  closeBtn.style.top = "10px";
+  closeBtn.style.right = "10px";
+  closeBtn.style.zIndex = "10000";
+  closeBtn.style.padding = "8px 12px";
+  closeBtn.style.cursor = "pointer";
+
+  fullscreenBtn.addEventListener("click", () => {
+    if(!isFullscreen){
+      placeholder.style.height = textarea.offsetHeight + "px";
+      textarea.parentNode.insertBefore(placeholder, textarea);
+      textarea.classList.add("fullscreen-textarea");
+      document.body.appendChild(closeBtn);
+      isFullscreen = true;
+    }
+  });
+
+  closeBtn.addEventListener("click", () => {
+    if(isFullscreen){
+      textarea.classList.remove("fullscreen-textarea");
+      placeholder.parentNode.insertBefore(textarea, placeholder);
+      placeholder.remove();
+      closeBtn.remove();
+      isFullscreen = false;
+    }
+  });
+
+  // Review HTML Modal
+  reviewBtn.addEventListener("click", () => {
+    htmlPreview.srcdoc = textarea.value;
+    htmlReviewModal.style.display = "flex";
+  });
+
+  closeHtmlReview.addEventListener("click", () => {
+    htmlReviewModal.style.display = "none";
+    htmlPreview.srcdoc = "";
+  });
+});
+</script>
+</body>
+</html>
