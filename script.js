@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const renamePopup = document.getElementById("renamePopup");
   const newNameInput = document.getElementById("newNameInput");
 
-  // ===== LOG =====
+// ===== LOG =====
   function log(msg, type = "info") {
     const p = document.createElement("p");
     p.textContent = msg;
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     output.scrollTop = output.scrollHeight;
   }
 
-  // ===== API =====
+// ===== API =====
   async function apiRequest(url, method = "GET", body = null) {
     const headers = { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" };
     if (body) headers["Content-Type"] = "application/json";
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try { return await res.json(); } catch { return {}; }
   }
 
-  // ===== TOKEN =====
+// ===== TOKEN =====
   document.getElementById("saveTokenBtn").addEventListener("click", () => {
     token = document.getElementById("tokenInput").value.trim();
     if (token) {
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else log("⚠️ Masukkan token!", "error");
   });
 
-  // ===== LOAD REPOS =====
+// ===== LOAD REPOS =====
   async function loadRepos() {
     try {
       log("🔄 Memuat daftar repository...", "info");
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     repoDiv.innerHTML = "<ul>" + files.map(f => `<li onclick="fileNameInput.value='${f.name}'">${f.type === 'dir' ? '📁' : '📄'} ${f.name}</li>`).join("") + "</ul>";
   }
 
-  // ===== CRUD REPO =====
+// ===== CRUD REPO =====
   async function createRepo() {
     const name = fileNameInput.value.trim();
     if (!name) return log("⚠️ Masukkan nama repo baru!", "error");
@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { log("❌ Error hapus repo: " + e.message, "error"); deleteConfirm = false; }
   }
 
-  // ===== CRUD FILE/FOLDER =====
+// ===== CRUD FILE/FOLDER =====
   async function createFile() {
     if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
     const name = fileNameInput.value.trim();
@@ -196,7 +196,7 @@ async function uploadFile(){
   fileInput.click();
 }
 
-// ===== DOWNLOAD FILE =====
+//=== DOWNLOAD FILE ===
 async function downloadFile(){
   if(!currentRepo) return log("⚠️ Pilih repo dulu!","error");
   
@@ -222,7 +222,7 @@ async function downloadFile(){
   }
 }
 
-// ===== Fungsi Notifikasi =====
+//== Fungsi Notifikasi ==
 function showNotification(msg) {
   const notif = document.createElement("div");
   notif.className = "popup-notif";
@@ -239,31 +239,47 @@ function showNotification(msg) {
   }, 2500); // tampil 2,5 detik
 }
 
-  // ===== ACTION DROPDOWN =====
-  document.getElementById("runActionBtn").addEventListener("click", () => {
-    const action = document.getElementById("actionMenu").value;
-    switch (action) {
-      case "createRepo": createRepo(); break;
-      case "renameRepo":
-        if (!fileNameInput.value.trim()) { log("⚠️ Masukkan nama repo lama", "error"); return; }
-        newNameInput.value = fileNameInput.value.trim();
-        renamePopup.style.display = "flex"; break;
-      case "deleteRepo": deleteRepo(); break;
-      case "createFile": createFile(); break;
-      case "editFile": editFile(); break;
-      case "deleteFile": deleteFile(); break;
-      case "createFolder": createFolder(); break;
-      case "renameItem":
-        if (!fileNameInput.value.trim()) { log("⚠️ Pilih file/folder dulu!", "error"); return; }
-        newNameInput.value = fileNameInput.value.trim();
-        renamePopup.style.display = "flex"; break;
-     case "uploadFile": uploadFile(); break;
-      case "downloadFile": downloadFile(); break;
-      default: alert("⚠️ Pilih aksi dulu!");
-    }
-  });
+// ===== CRUD FOLDER =====
+async function openFolder() {
+  if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
+  const folderName = fileNameInput.value.trim();
+  if (!folderName) return log("⚠️ Pilih folder dulu!", "error");
 
-  // ===== COPY & FULLSCREEN =====
+  try {
+    log(`📂 Membuka folder: ${folderName} ...`, "info");
+    const files = await apiRequest(`https://api.github.com/repos/${currentRepo}/contents/${folderName}`);
+    renderRepoContent(files);
+  } catch (e) {
+    log("❌ Error membuka folder: " + e.message, "error");
+  }
+}
+
+// ===== ACTION DROPDOWN =====
+document.getElementById("runActionBtn").addEventListener("click", () => {
+  const action = document.getElementById("actionMenu").value;
+  switch (action) {
+    case "createRepo": createRepo(); break;
+    case "renameRepo":
+      if (!fileNameInput.value.trim()) { log("⚠️ Masukkan nama repo lama", "error"); return; }
+      newNameInput.value = fileNameInput.value.trim();
+      renamePopup.style.display = "flex"; break;
+    case "deleteRepo": deleteRepo(); break;
+    case "createFile": createFile(); break;
+    case "editFile": editFile(); break;
+    case "deleteFile": deleteFile(); break;
+    case "createFolder": createFolder(); break;
+    case "renameItem":
+      if (!fileNameInput.value.trim()) { log("⚠️ Pilih file/folder dulu!", "error"); return; }
+      newNameInput.value = fileNameInput.value.trim();
+      renamePopup.style.display = "flex"; break;
+    case "uploadFile": uploadFile(); break;
+    case "downloadFile": downloadFile(); break;
+    case "openFolder": openFolder(); break;  // <-- opsi baru
+    default: alert("⚠️ Pilih aksi dulu!");
+  }
+});
+
+// === COPY & FULLSCREEN =====
   document.getElementById("copyBtn").addEventListener("click", () => {
     fileContentInput.select();
     document.execCommand("copy");
@@ -295,6 +311,34 @@ function showNotification(msg) {
   });
 
   document.getElementById("renameCancelBtn").addEventListener("click", () => { renamePopup.style.display = "none"; });
+
+// ===== BUKA FOLDER =====
+async function openFolder() {
+  if (!currentRepo) return log("⚠️ Pilih repo dulu!", "error");
+
+  const folder = prompt("Masukkan path folder (misal: src/ atau kosong untuk root):")?.trim() || "";
+
+  try {
+    const url = folder ? 
+      `https://api.github.com/repos/${currentRepo}/contents/${folder}` : 
+      `https://api.github.com/repos/${currentRepo}/contents/`;
+    
+    const files = await apiRequest(url);
+    
+    if (!files || files.length === 0) {
+      log("⚠️ Folder kosong atau tidak ditemukan", "info");
+    } else {
+      log(`📂 Isi folder "${folder || '/'}":`, "info");
+      const repoDiv = document.getElementById("fileList");
+      repoDiv.innerHTML = "<ul>" + files.map(f => 
+        `<li onclick="fileNameInput.value='${f.name}'">${f.type==='dir'?'📁':'📄'} ${f.name}</li>`
+      ).join("") + "</ul>";
+    }
+  } catch (e) {
+    log("❌ Error buka folder: " + e.message, "error");
+  }
+}
+
 
   // ===== RENAME FILE/FOLDER =====
   async function renameItem(oldName, newName) {
